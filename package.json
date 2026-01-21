@@ -1,0 +1,39 @@
+{
+  "name": "casdu-farside",
+  "version": "1.0.0",
+  "description": "CASDU Backend API - Standalone Server with MySQL and File System Storage",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.10.1",
+    "mysql2": "^3.11.5",
+    "dotenv": "^16.4.5",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/uuid": "^10.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "hono",
+    "backend",
+    "api",
+    "mysql",
+    "file-storage"
+  ],
+  "author": "",
+  "license": "ISC"
+}
