@@ -9,6 +9,7 @@ export const corsMiddleware = async (c: Context, next: Next) => {
 	c.header('Access-Control-Allow-Origin', '*');
 	c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
 	c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Secret');
+	c.header('Access-Control-Expose-Headers', 'Content-Disposition'); // Allow frontend to see filename
 	c.header('Access-Control-Max-Age', '86400'); // 24 hours
 
 	// Handle OPTIONS preflight request

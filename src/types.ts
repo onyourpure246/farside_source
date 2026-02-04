@@ -214,6 +214,7 @@ export interface CreateFolderRequest {
 	parent?: number | null;
 	mui_icon?: string;
 	mui_colour?: string;
+	isactive?: number;
 }
 
 export interface UpdateFolderRequest {
@@ -234,6 +235,7 @@ export interface CreateFileRequest {
 	sysname: string;
 	mui_icon?: string;
 	mui_colour?: string;
+	isactive?: number;
 }
 
 export interface UpdateFileRequest {
@@ -252,6 +254,7 @@ export interface UploadFileRequest {
 	name: string;
 	description?: string;
 	file: File; // The actual file to upload
+	isactive?: number;
 }
 
 // ============================================================================

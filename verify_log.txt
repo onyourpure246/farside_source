@@ -1,0 +1,18 @@
+🚀 Verifying 'isactive' Refactor on http://localhost:64197/api/fy2569
+
+1️⃣  Testing Draft (isactive=2)...
+✅ POST Response: 201 Created
+   ID: 11
+   IsActive: 2
+✅ PASSED: Folder created as Draft (2).
+   Testing GET /dl/folder/:id (Admin View)...
+✅ GET Response: Admin can see Draft.
+
+--------------------------------
+
+2️⃣  Testing Deleted (isactive=0)...
+✅ POST Response: 201 Created
+   ID: 12
+   IsActive: 0
+   Testing GET /dl/folder/:id (Admin View of Deleted)...
+✅ PASSED: Admin cannot see Deleted (0) item (got 404).

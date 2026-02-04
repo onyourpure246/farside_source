@@ -29,7 +29,7 @@
 ระบบใช้ **Auth.js (NextAuth v5)** ในรูปแบบ **Custom Credentials Provider** เพื่อรองรับ Flow พิเศษ:
 1.  **Frontend**: รับ `code` จากการ Redirect ของ ThaID
 2.  **NextAuth (Authorize)**: นำ `code` ไปแลก Token และดึงข้อมูลบัตรประชาชน (PID) ผ่าน `thaid-service`
-3.  **Verification**: นำ PID ที่ได้ ไปตรวจสอบกับ Internal DB ผ่าน `backend-api-mock` (หรือ Real API) ว่าเป็นพนักงานปัจจุบันหรือไม่
+3.  **Verification**: นำ PID ที่ได้ ไปตรวจสอบกับ Internal DB ผ่าน `backend-api` (Real API) ที่ endpoint `/api/fy2569/employee/verify` ว่าเป็นพนักงานปัจจุบันหรือไม่
 4.  **Session Creation**: สร้าง Session โดยผูกข้อมูล `PID`, `Role`, `Name` เข้ากับ User Session
 
 ### 2.3 Styling & UI Pattern
@@ -172,6 +172,26 @@ npm start
     -   `id`: PID (เลขบัตรประชาชน)
     -   `role`: 'admin' | 'user' (ได้จากการ Verify Role ผ่าน API)
 
+### 7.1 Key API Endpoints (Private)
+
+#### Employee Verification (Server-to-Server)
+*   **Method**: `POST`
+*   **URL**: `/api/fy2569/employee/verify`
+*   **Authentication**: Bearer Token (จาก `AUTH_SECRET` ใน ENV)
+*   **Body**: `{ "pid": "1234567890123" }`
+*   **Response**:
+    ```json
+    {
+      "success": true,
+      "data": {
+        "id": 1,
+        "username": "1234567890123",
+        "displayname": "นาย ทดสอบ ระบบ",
+        "isadmin": 1
+      }
+    }
+    ```
+
 ---
 
 ## 8. Development Guidelines พัฒนาเพิ่มเติม
@@ -189,7 +209,7 @@ npm start
 4.  ใช้ `useActionState` (React Hook) ในการเชื่อมต่อกับ Form ใน Client Component
 
 ---
-*Updated: 19 มกราคม 2026 (Migrated to Auth.js & ThaID Integration)*
+*Updated: 4 กุมภาพันธ์ 2026 (Implmented Real Employee Verification API)*
 
 ---
 

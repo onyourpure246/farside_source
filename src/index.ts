@@ -8,6 +8,8 @@ import commonsRouter from './routes/commons.routes';
 import plannerRouter from './routes/planner.routes';
 import dlRouter from './routes/download.routes';
 import newsRouter from './routes/news.routes';
+import employeeRouter from './routes/employee.routes';
+import userRouter from './routes/user.routes';
 
 // Load environment variables
 dotenv.config();
@@ -103,6 +105,8 @@ async function initialize() {
 	// app.route('/api/fy2569/planner', plannerRouter); // Disabled for initial verification
 	app.route('/api/fy2569/dl', dlRouter);
 	app.route('/api/fy2569/news', newsRouter); // Announcements / Public Relations
+	app.route('/api/fy2569/employee', employeeRouter); // Employee Verification for SSO
+	app.route('/api/fy2569/users', userRouter); // User Management (Admin)
 
 	// Start server
 	const port = parseInt(process.env.PORT || '3000');

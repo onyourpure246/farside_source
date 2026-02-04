@@ -18,8 +18,14 @@ dlRouter.get('/folder/:id', async (c) => {
 		const id = parseInt(c.req.param('id'));
 		const service = new DownloadService();
 
-		// Verify folder exists
-		const folder = await service.getFolderById(id);
+
+		// Check for admin privileges (if user exists, verified by middleware)
+		const user = c.get('user');
+		const authType = c.get('authType');
+		const isAdmin = (user?.isadmin === 1) || (authType === 'bearer');
+
+		// Verify folder exists (admins can see inactive)
+		const folder = await service.getFolderById(id, isAdmin ? 'admin' : 'public');
 		if (!folder) {
 			return c.json<ApiResponse<null>>(
 				{ success: false, error: 'Folder not found' },
@@ -27,7 +33,8 @@ dlRouter.get('/folder/:id', async (c) => {
 			);
 		}
 
-		const contents = await service.getFolderContents(id);
+		// Admins can see inactive content
+		const contents = await service.getFolderContents(id, isAdmin ? 'admin' : 'public');
 		return c.json<ApiResponse<any>>(
 			{ success: true, data: contents },
 			200
@@ -56,7 +63,13 @@ dlRouter.get('/folder/:id', async (c) => {
 dlRouter.get('/folder', async (c) => {
 	try {
 		const service = new DownloadService();
-		const contents = await service.getFolderContents(null);
+
+		// Check for admin privileges
+		const user = c.get('user');
+		const authType = c.get('authType');
+		const isAdmin = (user?.isadmin === 1) || (authType === 'bearer');
+
+		const contents = await service.getFolderContents(null, isAdmin ? 'admin' : 'public');
 		return c.json<ApiResponse<any>>(
 			{ success: true, data: contents },
 			200
@@ -217,7 +230,14 @@ dlRouter.get('/file/:id', async (c) => {
 		const download = c.req.query('dl');
 		const service = new DownloadService();
 
-		const file = await service.getFileById(id);
+
+
+		// Check for admin privileges
+		const user = c.get('user');
+		const authType = c.get('authType');
+		const isAdmin = (user?.isadmin === 1) || (authType === 'bearer');
+
+		const file = await service.getFileById(id, isAdmin ? 'admin' : 'public');
 		if (!file) {
 			return c.json<ApiResponse<null>>(
 				{ success: false, error: 'File not found' },
@@ -276,6 +296,7 @@ dlRouter.post('/file', async (c) => {
 		const name = formData.get('name') as string;
 		const description = formData.get('description') as string | null;
 		const file = formData.get('file') as File;
+		const isactiveVal = formData.get('isactive');
 
 		if (!name) {
 			return c.json<ApiResponse<null>>(
@@ -310,6 +331,7 @@ dlRouter.post('/file', async (c) => {
 			description: description || undefined,
 			filename: file.name,
 			sysname: sysname,
+			isactive: isactiveVal !== null ? parseInt(isactiveVal as string) : undefined
 		};
 
 		const createdFile = await service.createFile(fileData);

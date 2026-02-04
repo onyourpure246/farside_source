@@ -185,8 +185,28 @@ export async function adminAuthMiddleware(c: Context<AuthContext>, next: Next) {
 
 	const token = parts[1];
 	const jwtSecret = process.env.JWT_SECRET || '';
+	const authSecret = process.env.AUTH_SECRET || '';
 
-	// Verify JWT token
+	// 1. System/Server-to-Server Admin Access (using AUTH_SECRET)
+	if (token === authSecret) {
+		// Mock a super-admin user for the context
+		const systemAdmin = {
+			id: 0,
+			username: 'system',
+			displayname: 'System Administrator',
+			firstname: 'System',
+			lastname: 'Admin',
+			jobtitle: 'System',
+			isadmin: 1, // Crucial
+			created_at: new Date().toISOString(),
+			updated_at: new Date().toISOString()
+		};
+		c.set('user', systemAdmin);
+		c.set('authType', 'bearer');
+		return await next();
+	}
+
+	// 2. User Access (Verify JWT token)
 	try {
 		const authService = new AuthService(jwtSecret);
 		const user = await authService.verifyToken(token);

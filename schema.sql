@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `dl_folders` (
   `updated_by` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `parent` (`parent`)
+  FOREIGN KEY (`parent`) REFERENCES `dl_folders` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Files
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS `dl_files` (
   `updated_by` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `parent` (`parent`),
+  FOREIGN KEY (`parent`) REFERENCES `dl_folders` (`id`) ON DELETE CASCADE,
   KEY `sysname` (`sysname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
