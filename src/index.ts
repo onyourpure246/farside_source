@@ -62,6 +62,37 @@ async function initialize() {
 	// Apply CORS middleware to all routes
 	app.use('*', corsMiddleware);
 
+	// Global Error Handler
+	app.onError(async (err, c) => {
+		console.error('Global Error caught:', err);
+
+		try {
+			const { LogService } = await import('./services/log.service');
+			const logService = new LogService();
+			// Try to get user from context if available (depends on when error occurred)
+			const user = (c as any).get('user');
+			const userId = user?.id || null;
+			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+			const userAgent = c.req.header('user-agent');
+
+			await logService.logError(
+				userId,
+				'SYSTEM_CRASH',
+				err,
+				JSON.stringify(ip),
+				JSON.stringify(userAgent)
+			);
+		} catch (logErr) {
+			console.error('Failed to log global error:', logErr);
+		}
+
+		return c.json({
+			success: false,
+			error: 'Internal Server Error',
+			message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+		}, 500);
+	});
+
 	// Root endpoint - no auth required
 	app.get('/', (c) => {
 		return c.json({
@@ -101,7 +132,7 @@ async function initialize() {
 	});
 
 	// Mount route groups under /api/fy2569/
-	// app.route('/api/fy2569/commons', commonsRouter); // Legacy Auth & Participants - Disabled
+	app.route('/api/fy2569/commons', commonsRouter); // Legacy Auth & Participants - Enabled for Logging Test
 	// app.route('/api/fy2569/planner', plannerRouter); // Disabled for initial verification
 	app.route('/api/fy2569/dl', dlRouter);
 	app.route('/api/fy2569/news', newsRouter); // Announcements / Public Relations

@@ -4,6 +4,8 @@ import { ApiResponse, CreateFolderRequest, UpdateFolderRequest, CreateFileReques
 import { dualAuthMiddleware } from '../middleware/dual-auth.middleware';
 import type { AuthContext } from '../middleware/dual-auth.middleware';
 import { randomUUID } from 'crypto';
+import { LogService } from '../services/log.service';
+
 
 const dlRouter = new Hono<AuthContext>();
 
@@ -96,6 +98,27 @@ dlRouter.post('/folder', async (c) => {
 		const service = new DownloadService();
 
 		const folder = await service.createFolder(data);
+
+		// Log Create Folder
+		try {
+			const logService = new LogService();
+			const user = c.get('user');
+			const userId = user?.id ?? null;
+			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+			const agent = c.req.header('user-agent');
+			await logService.logActivity(
+				userId as number | null,
+				'CREATE_FOLDER',
+				'FOLDER',
+				folder.id,
+				{ name: folder.name, parent: folder.parent },
+				ip,
+				agent
+			);
+		} catch (e) {
+			console.error('Failed to log create folder', e);
+		}
+
 		return c.json<ApiResponse<any>>(
 			{ success: true, data: folder },
 			201
@@ -123,6 +146,27 @@ dlRouter.patch('/folder/:id', async (c) => {
 		const service = new DownloadService();
 
 		const folder = await service.updateFolder(id, data);
+
+		// Log Update Folder
+		try {
+			const logService = new LogService();
+			const user = c.get('user');
+			const userId = user?.id ?? null;
+			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+			const agent = c.req.header('user-agent');
+			await logService.logActivity(
+				userId as number | null,
+				'UPDATE_FOLDER',
+				'FOLDER',
+				id,
+				{ updates: data },
+				ip,
+				agent
+			);
+		} catch (e) {
+			console.error('Failed to log update folder', e);
+		}
+
 		return c.json<ApiResponse<any>>(
 			{ success: true, data: folder },
 			200
@@ -149,6 +193,27 @@ dlRouter.delete('/folder/:id', async (c) => {
 		const service = new DownloadService();
 
 		await service.deleteFolder(id);
+
+		// Log Delete Folder
+		try {
+			const logService = new LogService();
+			const user = c.get('user');
+			const userId = user?.id ?? null;
+			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+			const agent = c.req.header('user-agent');
+			await logService.logWarning(
+				userId as number | null,
+				'DELETE_FOLDER',
+				`Folder ${id} deleted`,
+				'FOLDER',
+				id,
+				ip,
+				agent
+			);
+		} catch (e) {
+			console.error('Failed to log delete folder', e);
+		}
+
 		return c.json<ApiResponse<null>>(
 			{ success: true, message: 'Folder deleted successfully' },
 			200
@@ -208,6 +273,27 @@ dlRouter.get('/file/uuid/:sysname', async (c) => {
 
 		// Determine generic content type (or assume image/jpeg for news?)
 		// Ideally we should store mime type, but simple serving:
+
+		// Log Download (UUID)
+		try {
+			const logService = new LogService();
+			const user = c.get('user');
+			const userId = user?.id ?? null;
+			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+			const agent = c.req.header('user-agent');
+			await logService.logActivity(
+				userId as number | null,
+				'DOWNLOAD_UUID',
+				'FILE',
+				sysname,
+				{ sysname },
+				ip,
+				agent
+			);
+		} catch (e) {
+			console.error('Failed to log UUID download', e);
+		}
+
 		return new Response(fileContent, {
 			headers: {
 				'Content-Type': 'application/octet-stream', // Browser will sniff or we can generic
@@ -256,6 +342,28 @@ dlRouter.get('/file/:id', async (c) => {
 				);
 			}
 
+			// Log Download Activity
+			try {
+				const logService = new LogService();
+				// user is already retrieved above
+				const userId = user?.id || null;
+				const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+				const agent = c.req.header('user-agent');
+
+				await logService.logActivity(
+					userId as number | null,
+					'DOWNLOAD',
+					'FILE',
+					file.id,
+					{ filename: file.filename, sysname: file.sysname },
+					ip,
+					agent
+				);
+			} catch (err) {
+				console.error('Failed to log download:', err);
+				// Continue serving file even if logging fails
+			}
+
 			// Return the file with appropriate headers
 			return new Response(fileContent, {
 				headers: {
@@ -264,6 +372,7 @@ dlRouter.get('/file/:id', async (c) => {
 					'Content-Length': fileContent.byteLength.toString(),
 				},
 			});
+
 		}
 
 		return c.json<ApiResponse<any>>(
@@ -336,6 +445,26 @@ dlRouter.post('/file', async (c) => {
 
 		const createdFile = await service.createFile(fileData);
 
+		// Log Upload File
+		try {
+			const logService = new LogService();
+			const user = c.get('user');
+			const userId = user?.id ?? null;
+			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+			const agent = c.req.header('user-agent');
+			await logService.logActivity(
+				userId as number | null,
+				'UPLOAD_FILE',
+				'FILE',
+				createdFile.id,
+				{ filename: createdFile.filename, sysname: createdFile.sysname, parent: createdFile.parent },
+				ip,
+				agent
+			);
+		} catch (e) {
+			console.error('Failed to log upload file', e);
+		}
+
 		return c.json<ApiResponse<any>>(
 			{ success: true, data: createdFile },
 			201
@@ -363,6 +492,27 @@ dlRouter.patch('/file/:id', async (c) => {
 		const service = new DownloadService();
 
 		const file = await service.updateFile(id, data);
+
+		// Log Update File
+		try {
+			const logService = new LogService();
+			const user = c.get('user');
+			const userId = user?.id ?? null;
+			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+			const agent = c.req.header('user-agent');
+			await logService.logActivity(
+				userId as number | null,
+				'UPDATE_FILE',
+				'FILE',
+				id,
+				{ updates: data },
+				ip,
+				agent
+			);
+		} catch (e) {
+			console.error('Failed to log update file', e);
+		}
+
 		return c.json<ApiResponse<any>>(
 			{ success: true, data: file },
 			200
@@ -389,6 +539,27 @@ dlRouter.delete('/file/:id', async (c) => {
 		const service = new DownloadService();
 
 		await service.deleteFile(id);
+
+		// Log Delete File
+		try {
+			const logService = new LogService();
+			const user = c.get('user');
+			const userId = user?.id ?? null;
+			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+			const agent = c.req.header('user-agent');
+			await logService.logWarning(
+				userId as number | null,
+				'DELETE_FILE',
+				`File ${id} deleted`,
+				'FILE',
+				id,
+				ip,
+				agent
+			);
+		} catch (e) {
+			console.error('Failed to log delete file', e);
+		}
+
 		return c.json<ApiResponse<null>>(
 			{ success: true, message: 'File deleted successfully' },
 			200

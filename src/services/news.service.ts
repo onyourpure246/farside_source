@@ -111,6 +111,13 @@ export class NewsService {
         return result.affectedRows > 0;
     }
 
+    async incrementViewCount(id: number): Promise<void> {
+        await execute(
+            'UPDATE common_news SET view_count = view_count + 1 WHERE id = ?',
+            [id]
+        );
+    }
+
     /**
      * Upload cover image to filesystem
      * Uses the same storage mechanism as download service

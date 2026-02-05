@@ -46,6 +46,19 @@ export async function dualAuthMiddleware(c: Context<AuthContext>, next: Next) {
 
 	// Check if it's the technical auth secret
 	if (token === authSecret) {
+		// Mock a system user for context to ensure logging works
+		const systemUser: SafeUser = {
+			id: 0,
+			username: 'system',
+			displayname: 'System Administrator',
+			firstname: 'System',
+			lastname: 'Admin',
+			jobtitle: 'System',
+			isadmin: 1,
+			created_at: new Date().toISOString(),
+			updated_at: new Date().toISOString()
+		};
+		c.set('user', systemUser);
 		c.set('authType', 'bearer');
 		return await next();
 	}

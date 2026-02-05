@@ -3,6 +3,8 @@ import { AuthService } from '../services/auth.service';
 import { dualAuthMiddleware } from '../middleware/dual-auth.middleware';
 import type { AuthContext } from '../middleware/dual-auth.middleware';
 import { ApiResponse, SafeUser } from '../types';
+import { LogService } from '../services/log.service';
+
 
 const router = new Hono<AuthContext>();
 
@@ -53,9 +55,34 @@ router.post('/verify', async (c) => {
             updated_at: user.updated_at
         };
 
-        return c.json<ApiResponse<SafeUser>>({
+        // Log Verification Success (Important for Audit)
+        try {
+            const logService = new LogService();
+            const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+            const userAgent = c.req.header('user-agent');
+            await logService.logActivity(
+                safeUser.id,
+                'VERIFY_EMPLOYEE',
+                'USER', // Corrected from AUTH
+                safeUser.id, // Corrected from PID to User ID
+                { displayname: safeUser.displayname }, // Removed PID for security
+                ip,
+                userAgent
+            );
+        } catch (e) {
+            console.error('Failed to log verification:', e);
+        }
+
+
+        // Generate JWT Token for specific user
+        const token = authService.generateToken(safeUser);
+
+        return c.json<ApiResponse<{ user: SafeUser, token: string }>>({
             success: true,
-            data: safeUser
+            data: {
+                user: safeUser,
+                token: token
+            }
         }, 200);
 
     } catch (error) {

@@ -3,6 +3,8 @@ import { AuthService } from '../services/auth.service';
 import { userAuthMiddleware } from '../middleware/dual-auth.middleware';
 import type { AuthContext } from '../middleware/dual-auth.middleware';
 import type { LoginRequest, CreateUserRequest, UpdateUserRequest } from '../types';
+import { LogService } from '../services/log.service';
+
 
 const router = new Hono<AuthContext>();
 
@@ -31,6 +33,22 @@ router.post('/login', async (c) => {
 		const result = await authService.login(username, password);
 
 		if (!result) {
+			// Log failed login
+			try {
+				const logService = new LogService();
+				const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+				const userAgent = c.req.header('user-agent');
+				await logService.logWarning(
+					null,
+					'LOGIN_FAILED',
+					'Invalid credentials',
+					'AUTH',
+					username,
+					ip,
+					userAgent
+				);
+			} catch (e) { console.error('Log failed', e); }
+
 			return c.json(
 				{
 					success: false,
@@ -38,13 +56,31 @@ router.post('/login', async (c) => {
 				},
 				401
 			);
+
 		}
+
+		// Log successful login
+		try {
+			const logService = new LogService();
+			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+			const userAgent = c.req.header('user-agent');
+			await logService.logActivity(
+				result.user.id,
+				'LOGIN',
+				'AUTH',
+				null,
+				{ username },
+				ip,
+				userAgent
+			);
+		} catch (e) { console.error('Log failed', e); }
 
 		return c.json({
 			success: true,
 			token: result.token,
 			user: result.user,
 		});
+
 	} catch (error) {
 		console.error('Login error:', error);
 		return c.json(
@@ -64,7 +100,7 @@ router.post('/login', async (c) => {
  */
 router.get('/me', userAuthMiddleware, async (c) => {
 	const user = c.get('user');
-	
+
 	if (!user) {
 		return c.json(
 			{
@@ -88,7 +124,7 @@ router.get('/me', userAuthMiddleware, async (c) => {
  */
 router.post('/refresh', userAuthMiddleware, async (c) => {
 	const user = c.get('user');
-	
+
 	if (!user) {
 		return c.json(
 			{
@@ -101,7 +137,7 @@ router.post('/refresh', userAuthMiddleware, async (c) => {
 
 	const jwtSecret = process.env.JWT_SECRET || '';
 	const authService = new AuthService(jwtSecret);
-	
+
 	// Generate new token
 	const token = authService.generateToken(user);
 
@@ -120,7 +156,7 @@ router.post('/refresh', userAuthMiddleware, async (c) => {
 router.patch('/password', userAuthMiddleware, async (c) => {
 	try {
 		const user = c.get('user');
-		
+
 		if (!user) {
 			return c.json(
 				{
@@ -207,7 +243,7 @@ router.patch('/password', userAuthMiddleware, async (c) => {
 router.patch('/profile', userAuthMiddleware, async (c) => {
 	try {
 		const user = c.get('user');
-		
+
 		if (!user) {
 			return c.json(
 				{
@@ -261,10 +297,28 @@ router.patch('/profile', userAuthMiddleware, async (c) => {
  * This is mainly for logging purposes
  */
 router.post('/logout', userAuthMiddleware, async (c) => {
+	// Log logout
+	try {
+		const user = c.get('user');
+		const logService = new LogService();
+		const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+		const userAgent = c.req.header('user-agent');
+		await logService.logActivity(
+			user?.id || null,
+			'LOGOUT',
+			'AUTH',
+			null,
+			null,
+			ip,
+			userAgent
+		);
+	} catch (e) { console.error('Log failed', e); }
+
 	return c.json({
 		success: true,
 		message: 'Logged out successfully',
 	});
+
 });
 
 export default router;

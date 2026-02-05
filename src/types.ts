@@ -138,6 +138,7 @@ export interface NewsItem {
 	cover_image: string | null;
 	status: 'draft' | 'published' | 'archived';
 	publish_date: string; // MySQL datetime string
+	view_count: number;
 	isactive: number;
 	created_by: string | null;
 	created_at: string;

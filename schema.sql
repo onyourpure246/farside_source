@@ -52,6 +52,24 @@ CREATE TABLE IF NOT EXISTS `common_tags` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Activity Logs (Universal Audit & Error Log)
+CREATE TABLE IF NOT EXISTS `common_activity_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,           -- NULL = Guest/System
+  `level` varchar(20) DEFAULT 'INFO',       -- INFO, WARN, ERROR, CRITICAL
+  `action` varchar(50) NOT NULL,            -- e.g. LOGIN, DOWNLOAD, SYSTEM_ERROR
+  `resource_type` varchar(50) NOT NULL,     -- e.g. FILE, USER, SYSTEM
+  `resource_id` varchar(100) DEFAULT NULL,
+  `details` text DEFAULT NULL,              -- JSON String or Stack Trace
+  `ip_address` varchar(50) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `level_idx` (`level`),
+  KEY `action_idx` (`action`),
+  KEY `created_at_idx` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ==========================================
 -- 2. Planner Module
 -- ==========================================
@@ -109,6 +127,23 @@ CREATE TABLE IF NOT EXISTS `planner_task_tags` (
   `task_id` int(11) NOT NULL,
   `tag_id` int(11) NOT NULL,
   PRIMARY KEY (`task_id`, `tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- News / Announcements
+CREATE TABLE IF NOT EXISTS `common_news` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `category` varchar(50) DEFAULT 'General',
+  `cover_image` varchar(255) DEFAULT NULL, -- UUID of file
+  `status` enum('draft', 'published') DEFAULT 'draft',
+  `publish_date` datetime DEFAULT NULL,
+  `view_count` int(11) DEFAULT 0,
+  `created_by` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` varchar(100) DEFAULT NULL,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================

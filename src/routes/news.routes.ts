@@ -2,6 +2,8 @@ import { Hono } from 'hono';
 import { NewsService } from '../services/news.service';
 import { dualAuthMiddleware, AuthContext } from '../middleware/dual-auth.middleware';
 import { randomUUID } from 'crypto';
+import { LogService } from '../services/log.service';
+import { SafeUser } from '../types';
 
 const newsRouter = new Hono<AuthContext>();
 const service = new NewsService();
@@ -31,6 +33,15 @@ newsRouter.get('/:id', async (c) => {
         if (!news) {
             return c.json({ success: false, error: 'News item not found' }, 404);
         }
+
+        // Increment view count ONLY for non-admin users (Real user engagement)
+        const user = c.get('user') as SafeUser | undefined;
+
+        if (user && !user.isadmin) {
+            await service.incrementViewCount(id);
+            news.view_count = (news.view_count || 0) + 1; // Optimistic update
+        }
+
         return c.json({ success: true, data: news });
     } catch (error: any) {
         return c.json({ success: false, error: error.message }, 500);
@@ -59,8 +70,12 @@ newsRouter.post('/', async (c) => {
             await service.uploadCoverImage(arrayBuffer, cover_image_uuid);
         }
 
-        // Hardcoded actor as per simplified requirement
-        const actor = 'admin';
+        // Determine actor
+        const user = c.get('user') as SafeUser | undefined;
+        let actor = user?.username || 'system';
+        if (user && user.firstname && user.lastname) {
+            actor = `${user.firstname} ${user.lastname}`;
+        }
 
         const news = await service.createNews({
             title,
@@ -70,6 +85,26 @@ newsRouter.post('/', async (c) => {
             publish_date,
             cover_image: cover_image_uuid || undefined
         }, actor);
+
+        // Log Create News
+        try {
+            const logService = new LogService();
+            const user = c.get('user') as SafeUser | undefined;
+            const userId = user?.id || null;
+            const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+            const agent = c.req.header('user-agent');
+            await logService.logActivity(
+                userId,
+                'CREATE_NEWS',
+                'NEWS',
+                news.id,
+                { title: news.title },
+                ip,
+                agent
+            );
+        } catch (e) {
+            console.error('Failed to log create news', e);
+        }
 
         return c.json({ success: true, data: news });
     } catch (error: any) {
@@ -99,10 +134,35 @@ newsRouter.patch('/:id', async (c) => {
             updateData.cover_image = cover_image_uuid;
         }
 
-        // Hardcoded actor as per simplified requirement
-        const actor = 'admin';
+        // Determine actor
+        const user = c.get('user') as SafeUser | undefined;
+        let actor = user?.username || 'system';
+        if (user && user.firstname && user.lastname) {
+            actor = `${user.firstname} ${user.lastname}`;
+        }
 
         const news = await service.updateNews(id, updateData, actor);
+
+        // Log Update News
+        try {
+            const logService = new LogService();
+            const user = c.get('user') as SafeUser | undefined;
+            const userId = user?.id || null;
+            const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+            const agent = c.req.header('user-agent');
+            await logService.logActivity(
+                userId,
+                'UPDATE_NEWS',
+                'NEWS',
+                news.id,
+                { updates: updateData },
+                ip,
+                agent
+            );
+        } catch (e) {
+            console.error('Failed to log update news', e);
+        }
+
         return c.json({ success: true, data: news });
     } catch (error: any) {
         return c.json({ success: false, error: error.message }, 500);
@@ -117,6 +177,26 @@ newsRouter.delete('/:id', async (c) => {
         if (!success) {
             return c.json({ success: false, error: 'News item not found or could not be deleted' }, 404);
         }
+        // Log Delete News
+        try {
+            const logService = new LogService();
+            const user = c.get('user') as SafeUser | undefined;
+            const userId = user?.id ?? null;
+            const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+            const agent = c.req.header('user-agent');
+            await logService.logWarning(
+                userId,
+                'DELETE_NEWS',
+                `News ${id} deleted by Admin`,
+                'NEWS',
+                id,
+                ip,
+                agent
+            );
+        } catch (e) {
+            console.error('Failed to log delete news', e);
+        }
+
         return c.json({ success: true, message: 'News item deleted successfully' });
     } catch (error: any) {
         return c.json({ success: false, error: error.message }, 500);

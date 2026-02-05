@@ -3,6 +3,8 @@ import { AuthService } from '../services/auth.service';
 import { adminAuthMiddleware } from '../middleware/dual-auth.middleware';
 import type { AuthContext } from '../middleware/dual-auth.middleware';
 import { ApiResponse, SafeUser } from '../types';
+import { LogService } from '../services/log.service';
+
 
 const router = new Hono<AuthContext>();
 
@@ -52,6 +54,26 @@ router.delete('/:id', async (c) => {
                 success: false,
                 error: 'User not found or could not be deleted'
             }, 404);
+        }
+
+        // Log Delete User
+        try {
+            const logService = new LogService();
+            const user = c.get('user');
+            const userId = user?.id ?? null;
+            const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+            const agent = c.req.header('user-agent');
+            await logService.logWarning(
+                userId as number | null,
+                'DELETE_USER',
+                `User ${id} deleted by Admin`,
+                'USER',
+                id,
+                ip,
+                agent
+            );
+        } catch (e) {
+            console.error('Failed to log delete user', e);
         }
 
         return c.json<ApiResponse<null>>({
