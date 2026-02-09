@@ -258,3 +258,61 @@ export async function adminAuthMiddleware(c: Context<AuthContext>, next: Next) {
 		);
 	}
 }
+
+/**
+ * Optional authentication middleware
+ * Attempts to extract user from token if present, but does not block request if missing or invalid.
+ * Useful for public endpoints that can be enhanced with user context (e.g. search tracking).
+ */
+export async function optionalAuthMiddleware(c: Context<AuthContext>, next: Next) {
+	const authHeader = c.req.header('Authorization');
+
+	// If no auth header, proceed as anonymous
+	if (!authHeader) {
+		return await next();
+	}
+
+	// Parse Bearer token
+	const parts = authHeader.split(' ');
+	if (parts.length !== 2 || parts[0] !== 'Bearer') {
+		// Invalid format, just ignore and proceed as anonymous
+		return await next();
+	}
+
+	const token = parts[1];
+	const authSecret = process.env.AUTH_SECRET || '';
+	const jwtSecret = process.env.JWT_SECRET || '';
+
+	// 1. System/Technical Access
+	if (token === authSecret) {
+		const systemUser: SafeUser = {
+			id: 0,
+			username: 'system',
+			displayname: 'System',
+			firstname: 'System',
+			lastname: 'User',
+			jobtitle: 'System',
+			isadmin: 1,
+			created_at: new Date().toISOString(),
+			updated_at: new Date().toISOString()
+		};
+		c.set('user', systemUser);
+		c.set('authType', 'bearer');
+		return await next();
+	}
+
+	// 2. User Access (JWT)
+	try {
+		const authService = new AuthService(jwtSecret);
+		const user = await authService.verifyToken(token);
+
+		if (user) {
+			c.set('user', user);
+			c.set('authType', 'jwt');
+		}
+	} catch (error) {
+		// Ignore token errors
+	}
+
+	return await next();
+}

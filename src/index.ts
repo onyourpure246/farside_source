@@ -11,6 +11,7 @@ import newsRouter from './routes/news.routes';
 import employeeRouter from './routes/employee.routes';
 import userRouter from './routes/user.routes';
 import dashboardRouter from './routes/dashboard.routes';
+import searchRouter from './routes/search.routes';
 
 // Load environment variables
 dotenv.config();
@@ -140,6 +141,7 @@ async function initialize() {
 	app.route('/api/fy2569/employee', employeeRouter); // Employee Verification for SSO
 	app.route('/api/fy2569/users', userRouter); // User Management (Admin)
 	app.route('/api/fy2569/dashboard', dashboardRouter); // Admin Dashboard
+	app.route('/api/fy2569/search', searchRouter); // Search Tracking & Popular Tags
 
 
 	// Start server

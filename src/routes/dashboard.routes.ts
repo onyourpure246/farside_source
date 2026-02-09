@@ -117,10 +117,23 @@ dashboardRouter.get('/audit-logs', async (c) => {
         `);
 
         // Parse details JSON if string
-        const parsedLogs = auditLogs.map(log => ({
-            ...log,
-            details: typeof log.details === 'string' ? JSON.parse(log.details) : log.details
-        }));
+        const parsedLogs = auditLogs.map(log => {
+            let details = log.details;
+            try {
+                if (typeof log.details === 'string') {
+                    details = JSON.parse(log.details);
+                }
+            } catch (e) {
+                // If parsing fails, keep original string
+            }
+
+            // For SYSTEM_CRASH, extracting only the message for better readability
+            if (log.action === 'SYSTEM_CRASH' && details?.message) {
+                return { ...log, details: details.message };
+            }
+
+            return { ...log, details };
+        });
 
         return c.json({
             success: true,
