@@ -90,4 +90,59 @@ router.delete('/:id', async (c) => {
     }
 });
 
+/**
+ * PATCH /api/fy2569/users/:id
+ * Update a user by ID (role, status, profile)
+ */
+router.patch('/:id', async (c) => {
+    try {
+        const id = parseInt(c.req.param('id'));
+        const body = await c.req.json();
+        const jwtSecret = process.env.JWT_SECRET || 'temp-secret';
+        const authService = new AuthService(jwtSecret);
+
+        // Sanitize input
+        const updatedUser = await authService.updateUser(id, body);
+
+        if (!updatedUser) {
+            return c.json<ApiResponse<null>>({
+                success: false,
+                error: 'User not found or update failed'
+            }, 404);
+        }
+
+        // Log Update User
+        try {
+            const logService = new LogService();
+            const user = c.get('user');
+            const userId = user?.id ?? null;
+            const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+            const agent = c.req.header('user-agent');
+            await logService.logActivity(
+                userId as number | null,
+                'UPDATE_USER',
+                'USER',
+                id,
+                { updates: body },
+                ip,
+                agent
+            );
+        } catch (e) {
+            console.error('Failed to log update user', e);
+        }
+
+        return c.json<ApiResponse<SafeUser>>({
+            success: true,
+            data: updatedUser
+        }, 200);
+
+    } catch (error) {
+        console.error('Update user error:', error);
+        return c.json<ApiResponse<null>>({
+            success: false,
+            error: 'Failed to update user'
+        }, 500);
+    }
+});
+
 export default router;

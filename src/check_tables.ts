@@ -1,8 +1,6 @@
 import { initializeDatabase, query, closeDatabase } from './services/database.service';
 import * as dotenv from 'dotenv';
-import path from 'path';
 
-// Fix for custom location of .env if needed, but here we assume it's in root
 dotenv.config();
 
 async function run() {
@@ -17,26 +15,31 @@ async function run() {
 
         initializeDatabase(config);
 
-        console.log('--- DB INSPECTION START ---');
-
-        const userCols = await query('SHOW COLUMNS FROM common_users');
-        console.log('common_users columns:', userCols.map((c: any) => c.Field));
+        console.log('--- CHECKING TABLES ---');
 
         try {
-            const empCols = await query('SHOW COLUMNS FROM employees');
-            console.log('employees columns:', empCols.map((c: any) => c.Field));
-        } catch (e) {
-            console.log('employees table not found or error accessing it.');
+            const usersCols = await query('DESCRIBE common_users');
+            console.log('common_users columns:', usersCols.map((c: any) => c.Field));
+        } catch (e: any) {
+            console.log('common_users table error:', e.message);
         }
 
-        console.log('--- DB INSPECTION END ---');
+        try {
+            const empCols = await query('DESCRIBE employees');
+            console.log('employees columns:', empCols.map((c: any) => c.Field));
+        } catch (e: any) {
+            console.log('employees table error:', e.message);
+            // Try to find any table that looks like employees
+            const tables = await query('SHOW TABLES');
+            console.log('All tables:', tables);
+        }
+
+        console.log('--- END CHECKS ---');
 
     } catch (err) {
         console.error('Error:', err);
     } finally {
-        // Ensure pool closed
         await closeDatabase();
-        process.exit(0);
     }
 }
 

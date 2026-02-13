@@ -1,0 +1,16 @@
+[
+    {
+        "cid": "3101000046943",
+        "firstname": "Somchai",
+        "lastname": "Tester",
+        "email": "somchai@test.local",
+        "position": "Tester"
+    },
+    {
+        "cid": "1101000093449",
+        "firstname": "System",
+        "lastname": "Admin",
+        "email": "admin@system.local",
+        "position": "Administrator"
+    }
+]

@@ -14,12 +14,15 @@ export interface ApiResponse<T> {
 export interface CommonUser {
 	id: number;
 	username: string;
-	password: string; // bcrypt hashed
+	password: string; // bcrypt hashed (or 'thaid' for ThaID users)
 	displayname: string | null;
 	firstname: string | null;
 	lastname: string | null;
+	email: string | null;
 	jobtitle: string | null;
-	isadmin: number;
+	role: string; // 'admin', 'user', 'staff', etc.
+	status: string; // 'active', 'suspended', etc.
+	isadmin: number; // Kept for backward compatibility (1 if role='admin')
 	created_at: string;
 	updated_at: string;
 }
@@ -31,10 +34,24 @@ export interface SafeUser {
 	displayname: string | null;
 	firstname: string | null;
 	lastname: string | null;
+	email: string | null;
 	jobtitle: string | null;
+	role: string;
+	status: string;
 	isadmin: number;
 	created_at: string;
 	updated_at: string;
+}
+
+// HR Employee Interface
+export interface Employee {
+	id: number;
+	cid: string;
+	firstname: string | null;
+	lastname: string | null;
+	email: string | null;
+	position: string | null;
+	isactive: number;
 }
 
 // Request DTOs - Users
@@ -44,7 +61,10 @@ export interface CreateUserRequest {
 	displayname?: string;
 	firstname?: string;
 	lastname?: string;
+	email?: string;
 	jobtitle?: string;
+	role?: string;
+	status?: string;
 	isadmin?: number;
 }
 
@@ -53,7 +73,10 @@ export interface UpdateUserRequest {
 	displayname?: string;
 	firstname?: string;
 	lastname?: string;
+	email?: string;
 	jobtitle?: string;
+	role?: string;
+	status?: string;
 	isadmin?: number;
 }
 
@@ -196,6 +219,7 @@ export interface DLFile {
 	mui_icon: string | null;
 	mui_colour: string | null;
 	isactive: number;
+	downloads: number;
 	created_by: number | null;
 	created_at: string;
 	updated_by: number | null;
@@ -216,6 +240,7 @@ export interface CreateFolderRequest {
 	mui_icon?: string;
 	mui_colour?: string;
 	isactive?: number;
+	created_by?: number;
 }
 
 export interface UpdateFolderRequest {
@@ -226,6 +251,8 @@ export interface UpdateFolderRequest {
 	mui_icon?: string;
 	mui_colour?: string;
 	isactive?: number;
+	updated_by?: number;
+	created_by?: number;
 }
 
 export interface CreateFileRequest {
@@ -237,6 +264,7 @@ export interface CreateFileRequest {
 	mui_icon?: string;
 	mui_colour?: string;
 	isactive?: number;
+	created_by?: number;
 }
 
 export interface UpdateFileRequest {
@@ -247,6 +275,8 @@ export interface UpdateFileRequest {
 	mui_icon?: string;
 	mui_colour?: string;
 	isactive?: number;
+	updated_by?: number;
+	created_by?: number;
 }
 
 // File Upload Request (for multipart/form-data)

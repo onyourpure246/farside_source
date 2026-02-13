@@ -5,7 +5,6 @@ import { initializeDatabase, testConnection } from './services/database.service'
 import { initializeFileStorage } from './services/file-storage.service';
 import { corsMiddleware } from './middleware/cors.middleware';
 import commonsRouter from './routes/commons.routes';
-import plannerRouter from './routes/planner.routes';
 import dlRouter from './routes/download.routes';
 import newsRouter from './routes/news.routes';
 import employeeRouter from './routes/employee.routes';
@@ -63,6 +62,14 @@ async function initialize() {
 
 	// Apply CORS middleware to all routes
 	app.use('*', corsMiddleware);
+
+	// Global Logger
+	app.use('*', async (c, next) => {
+		const start = Date.now();
+		await next();
+		const ms = Date.now() - start;
+		console.log(`[${c.req.method}] ${c.req.path} - ${c.res.status} (${ms}ms)`);
+	});
 
 	// Global Error Handler
 	app.onError(async (err, c) => {

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { NewsService } from '../services/news.service';
-import { dualAuthMiddleware, AuthContext } from '../middleware/dual-auth.middleware';
+import { dualAuthMiddleware, dualAuthMiddlewarePermissive, AuthContext } from '../middleware/dual-auth.middleware';
 import { randomUUID } from 'crypto';
 import { LogService } from '../services/log.service';
 import { SafeUser } from '../types';
@@ -8,8 +8,9 @@ import { SafeUser } from '../types';
 const newsRouter = new Hono<AuthContext>();
 const service = new NewsService();
 
-// Apply dual authentication middleware to all routes
-newsRouter.use('*', dualAuthMiddleware);
+// Apply permissive dual authentication middleware to all routes
+// GET methods will be public, others will require auth
+newsRouter.use('*', dualAuthMiddlewarePermissive);
 
 // GET / - List all news
 newsRouter.get('/', async (c) => {

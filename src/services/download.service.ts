@@ -6,11 +6,18 @@ export class DownloadService {
 	// ========== FOLDERS ==========
 
 	async getFolderById(id: number, viewMode: 'public' | 'admin' | 'all' = 'public'): Promise<DLFolder | null> {
-		let sql = 'SELECT * FROM dl_folders WHERE id = ?';
+		let sql = `SELECT f.*, 
+						  CONCAT(c.firstname, ' ', c.lastname) as created_by_name,
+						  CONCAT(u.firstname, ' ', u.lastname) as updated_by_name
+				   FROM dl_folders f
+				   LEFT JOIN common_users c ON f.created_by = c.id
+				   LEFT JOIN common_users u ON f.updated_by = u.id
+				   WHERE f.id = ?`;
+
 		if (viewMode === 'public') {
-			sql += ' AND isactive = 1';
+			sql += ' AND f.isactive = 1';
 		} else if (viewMode === 'admin') {
-			sql += ' AND isactive IN (1, 2)';
+			sql += ' AND f.isactive IN (1, 2)';
 		}
 		// 'all' implies no filtering on isactive (active, draft, deleted/0)
 
@@ -34,27 +41,35 @@ export class DownloadService {
 
 		let activeClause = '';
 		if (viewMode === 'public') {
-			activeClause = ' AND isactive = 1';
+			activeClause = ' AND f.isactive = 1';
 		} else if (viewMode === 'admin') {
-			activeClause = ' AND isactive IN (1, 2)';
+			activeClause = ' AND f.isactive IN (1, 2)';
 		}
 
+		const folderSql = `SELECT f.*, 
+								  CONCAT(c.firstname, ' ', c.lastname) as created_by_name,
+								  CONCAT(u.firstname, ' ', u.lastname) as updated_by_name
+						   FROM dl_folders f
+						   LEFT JOIN common_users c ON f.created_by = c.id
+						   LEFT JOIN common_users u ON f.updated_by = u.id
+						   WHERE f.parent ${folderId === null ? 'IS NULL' : '= ?'} ${activeClause} 
+						   ORDER BY f.abbr ASC`;
+
+		const fileSql = `SELECT f.*, 
+								CONCAT(c.firstname, ' ', c.lastname) as created_by_name,
+								CONCAT(u.firstname, ' ', u.lastname) as updated_by_name
+						 FROM dl_files f
+						 LEFT JOIN common_users c ON f.created_by = c.id
+						 LEFT JOIN common_users u ON f.updated_by = u.id
+						 WHERE f.parent ${folderId === null ? 'IS NULL' : '= ?'} ${activeClause} 
+						 ORDER BY f.name ASC`;
+
 		if (folderId === null) {
-			folders = await query<DLFolder>(
-				`SELECT * FROM dl_folders WHERE parent IS NULL${activeClause} ORDER BY abbr ASC`
-			);
-			files = await query<DLFile>(
-				`SELECT * FROM dl_files WHERE parent IS NULL${activeClause} ORDER BY name ASC`
-			);
+			folders = await query<DLFolder>(folderSql);
+			files = await query<DLFile>(fileSql);
 		} else {
-			folders = await query<DLFolder>(
-				`SELECT * FROM dl_folders WHERE parent = ?${activeClause} ORDER BY abbr ASC`,
-				[folderId]
-			);
-			files = await query<DLFile>(
-				`SELECT * FROM dl_files WHERE parent = ?${activeClause} ORDER BY name ASC`,
-				[folderId]
-			);
+			folders = await query<DLFolder>(folderSql, [folderId]);
+			files = await query<DLFile>(fileSql, [folderId]);
 		}
 
 		// Apply default values for folders
@@ -89,11 +104,12 @@ export class DownloadService {
 			const abbr = data.abbr || data.name || 'New Folder';
 
 			const isactive = data.isactive !== undefined ? data.isactive : 1;
+			const createdBy = data.created_by || null;
 
 			const result = await execute(
-				`INSERT INTO dl_folders (abbr, name, description, parent, mui_icon, mui_colour, isactive, created_at, updated_at)
-				 VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-				[abbr, data.name || null, data.description || null, data.parent || null, muiIcon, muiColour, isactive]
+				`INSERT INTO dl_folders (abbr, name, description, parent, mui_icon, mui_colour, isactive, created_by, updated_by, created_at, updated_at)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+				[abbr, data.name || null, data.description || null, data.parent || null, muiIcon, muiColour, isactive, createdBy, createdBy]
 			);
 
 			console.log('Folder inserted with ID:', result.insertId);
@@ -131,7 +147,7 @@ export class DownloadService {
 		}
 		if (data.parent !== undefined) {
 			updates.push('parent = ?');
-			values.push(data.parent);
+			values.push(data.parent !== null ? parseInt(String(data.parent)) : null);
 		}
 		if (data.mui_icon !== undefined) {
 			updates.push('mui_icon = ?');
@@ -143,7 +159,15 @@ export class DownloadService {
 		}
 		if (data.isactive !== undefined) {
 			updates.push('isactive = ?');
-			values.push(data.isactive);
+			values.push(parseInt(String(data.isactive)));
+		}
+		if (data.updated_by !== undefined) {
+			updates.push('updated_by = ?');
+			values.push(parseInt(String(data.updated_by)));
+		}
+		if (data.created_by !== undefined) {
+			updates.push('created_by = ?');
+			values.push(parseInt(String(data.created_by)));
 		}
 
 		if (updates.length === 0) {
@@ -209,12 +233,26 @@ export class DownloadService {
 
 	// ========== FILES ==========
 
+	async incrementDownloadCount(id: number): Promise<void> {
+		await execute(
+			'UPDATE dl_files SET downloads = downloads + 1 WHERE id = ?',
+			[id]
+		);
+	}
+
 	async getFileById(id: number, viewMode: 'public' | 'admin' | 'all' = 'public'): Promise<DLFile | null> {
-		let sql = 'SELECT * FROM dl_files WHERE id = ?';
+		let sql = `SELECT f.*, 
+						  CONCAT(c.firstname, ' ', c.lastname) as created_by_name,
+						  CONCAT(u.firstname, ' ', u.lastname) as updated_by_name
+				   FROM dl_files f
+				   LEFT JOIN common_users c ON f.created_by = c.id
+				   LEFT JOIN common_users u ON f.updated_by = u.id
+				   WHERE f.id = ?`;
+
 		if (viewMode === 'public') {
-			sql += ' AND isactive = 1';
+			sql += ' AND f.isactive = 1';
 		} else if (viewMode === 'admin') {
-			sql += ' AND isactive IN (1, 2)';
+			sql += ' AND f.isactive IN (1, 2)';
 		}
 
 		const file = await queryOne<DLFile>(
@@ -226,6 +264,7 @@ export class DownloadService {
 		if (file) {
 			if (!file.mui_icon) file.mui_icon = 'InsertDriveFile';
 			if (!file.mui_colour) file.mui_colour = '#FFCE3C';
+			if (file.downloads === undefined) file.downloads = 0;
 		}
 
 		return file;
@@ -237,11 +276,12 @@ export class DownloadService {
 		const muiColour = data.mui_colour || '#FFCE3C';
 
 		const isactive = data.isactive !== undefined ? data.isactive : 1;
+		const createdBy = data.created_by || null;
 
 		const result = await execute(
-			`INSERT INTO dl_files (parent, name, description, filename, sysname, mui_icon, mui_colour, isactive, created_at, updated_at)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-			[data.parent || null, data.name, data.description || null, data.filename, data.sysname, muiIcon, muiColour, isactive]
+			`INSERT INTO dl_files (parent, name, description, filename, sysname, mui_icon, mui_colour, isactive, downloads, created_by, updated_by, created_at, updated_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, NOW(), NOW())`,
+			[data.parent || null, data.name, data.description || null, data.filename, data.sysname, muiIcon, muiColour, isactive, createdBy, createdBy]
 		);
 
 		// Fetch the created file, ignoring active check
@@ -256,7 +296,7 @@ export class DownloadService {
 
 		if (data.parent !== undefined) {
 			updates.push('parent = ?');
-			values.push(data.parent);
+			values.push(data.parent !== null ? parseInt(String(data.parent)) : null);
 		}
 		if (data.name !== undefined) {
 			updates.push('name = ?');
@@ -280,7 +320,15 @@ export class DownloadService {
 		}
 		if (data.isactive !== undefined) {
 			updates.push('isactive = ?');
-			values.push(data.isactive);
+			values.push(parseInt(String(data.isactive)));
+		}
+		if (data.created_by !== undefined) {
+			updates.push('created_by = ?');
+			values.push(parseInt(String(data.created_by)));
+		}
+		if (data.updated_by !== undefined) {
+			updates.push('updated_by = ?');
+			values.push(parseInt(String(data.updated_by)));
 		}
 
 		if (updates.length === 0) {

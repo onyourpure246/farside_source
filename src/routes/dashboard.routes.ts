@@ -20,8 +20,14 @@ dashboardRouter.get('/stats', async (c) => {
         `);
 
         // 2. Active Users (Unique User IDs in logs)
-        const userResult = await queryOne<{ count: number }>(`
-            SELECT COUNT(DISTINCT user_id) as count FROM common_activity_logs
+        // 2. Active Users (Users with 'active' status - Inventory Active)
+        const activeUserResult = await queryOne<{ count: number }>(`
+            SELECT COUNT(*) as count FROM common_users WHERE status = 'active'
+        `);
+
+        // 2.5 Total Users (All users in system - Total Inventory)
+        const totalUserResult = await queryOne<{ count: number }>(`
+            SELECT COUNT(*) as count FROM common_users
         `);
 
         // 3. Total Files (Active files in system)
@@ -41,7 +47,8 @@ dashboardRouter.get('/stats', async (c) => {
             success: true,
             data: {
                 total_logins: loginResult?.count || 0,
-                active_users: userResult?.count || 0,
+                active_users: activeUserResult?.count || 0,
+                total_users: totalUserResult?.count || 0,
                 total_files: fileResult?.count || 0,
                 system_crashes: crashResult?.count || 0
             }

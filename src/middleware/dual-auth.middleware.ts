@@ -53,7 +53,10 @@ export async function dualAuthMiddleware(c: Context<AuthContext>, next: Next) {
 			displayname: 'System Administrator',
 			firstname: 'System',
 			lastname: 'Admin',
+			email: 'system@localhost',
 			jobtitle: 'System',
+			role: 'admin',
+			status: 'active',
 			isadmin: 1,
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()
@@ -209,7 +212,10 @@ export async function adminAuthMiddleware(c: Context<AuthContext>, next: Next) {
 			displayname: 'System Administrator',
 			firstname: 'System',
 			lastname: 'Admin',
+			email: 'system@localhost',
 			jobtitle: 'System',
+			role: 'admin',
+			status: 'active',
 			isadmin: 1, // Crucial
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()
@@ -291,7 +297,10 @@ export async function optionalAuthMiddleware(c: Context<AuthContext>, next: Next
 			displayname: 'System',
 			firstname: 'System',
 			lastname: 'User',
+			email: 'system@localhost',
 			jobtitle: 'System',
+			role: 'admin',
+			status: 'active',
 			isadmin: 1,
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()

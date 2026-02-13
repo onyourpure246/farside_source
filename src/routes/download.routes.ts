@@ -342,6 +342,11 @@ dlRouter.get('/file/:id', async (c) => {
 				);
 			}
 
+			// Increment Download Count (Async - Fire and Forget)
+			service.incrementDownloadCount(file.id).catch(err => {
+				console.error(`Failed to increment download count for file ${file.id}:`, err);
+			});
+
 			// Log Download Activity
 			try {
 				const logService = new LogService();

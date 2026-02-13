@@ -1,0 +1,28 @@
+﻿Initializing database...
+Initializing database connection with config: {
+  host: '127.0.0.1',
+  port: 3307,
+  user: 'root',
+  database: 'casdu_internalis',
+  connectionLimit: 10
+}
+Running Active Users (Behavioral) Query...
+MySQL connection established (Thread ID: 669)
+Active Users (Behavioral): 3
+Running Total Users (Inventory) Query...
+Total Users (Inventory): 2
+--- Debug: Listing all users ---
+[
+  {
+    "username": "1101000093449",
+    "status": "active"
+  },
+  {
+    "username": "3101000046943",
+    "status": "inactive"
+  },
+  {
+    "username": "1123455567891",
+    "status": "active"
+  }
+]
