@@ -100,8 +100,9 @@ export async function dualAuthMiddlewarePermissive(c: Context<AuthContext>, next
 	const method = c.req.method;
 
 	// Allow GET, HEAD, OPTIONS requests without authentication
+	// But attempt to resolve user if token is present (for view counts, etc.)
 	if (['GET', 'HEAD', 'OPTIONS'].includes(method)) {
-		return await next();
+		return await optionalAuthMiddleware(c, next);
 	}
 
 	// For other methods, use dual auth

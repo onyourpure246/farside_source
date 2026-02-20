@@ -125,4 +125,8 @@ export class NewsService {
     async uploadCoverImage(file: Buffer | ArrayBuffer, sysname: string): Promise<string> {
         return await fileStorage.saveFile(sysname, file);
     }
+
+    async deleteCoverImage(filename: string): Promise<boolean> {
+        return await fileStorage.deleteFile(filename);
+    }
 }

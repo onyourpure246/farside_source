@@ -65,14 +65,22 @@ dashboardRouter.get('/stats', async (c) => {
  */
 dashboardRouter.get('/chart-data', async (c) => {
     try {
-        // 1. Login Trends (Last 7 Days)
+        // 1. Login Trends (Last 14 Days)
         const loginTrends = await query<{ date: string, count: number }>(`
-            SELECT DATE(created_at) as date, COUNT(*) as count 
-            FROM common_activity_logs 
-            WHERE action = 'VERIFY_EMPLOYEE' 
-            AND created_at >= DATE(NOW()) - INTERVAL 7 DAY
-            GROUP BY DATE(created_at)
-            ORDER BY date ASC
+            WITH RECURSIVE dates (date) AS (
+                SELECT DATE(NOW() - INTERVAL 13 DAY)
+                UNION ALL
+                SELECT date + INTERVAL 1 DAY FROM dates WHERE date < DATE(NOW())
+            )
+            SELECT 
+                DATE_FORMAT(dates.date, '%Y-%m-%d') as date, 
+                COUNT(logs.id) as count 
+            FROM dates 
+            LEFT JOIN common_activity_logs logs 
+                ON DATE(logs.created_at) = dates.date 
+                AND logs.action = 'VERIFY_EMPLOYEE'
+            GROUP BY dates.date 
+            ORDER BY dates.date ASC
         `);
 
         // 2. Top Downloads (Top 5)

@@ -38,7 +38,7 @@ newsRouter.get('/:id', async (c) => {
         // Increment view count ONLY for non-admin users (Real user engagement)
         const user = c.get('user') as SafeUser | undefined;
 
-        if (user && !user.isadmin) {
+        if (!user || !user.isadmin) {
             await service.incrementViewCount(id);
             news.view_count = (news.view_count || 0) + 1; // Optimistic update
         }
@@ -126,9 +126,24 @@ newsRouter.patch('/:id', async (c) => {
         if (formData.has('status')) updateData.status = formData.get('status');
         if (formData.has('publish_date')) updateData.publish_date = formData.get('publish_date');
 
+        // Handle cover image removal
+        if (formData.get('remove_cover_image') === 'true') {
+            const currentNews = await service.getNewsById(id);
+            if (currentNews && currentNews.cover_image) {
+                await service.deleteCoverImage(currentNews.cover_image);
+                updateData.cover_image = null;
+            }
+        }
+
         // Handle cover image update
         const file = formData.get('cover_image');
         if (file && file instanceof File) {
+            // If replacing, we should also delete the old image to prevent orphans
+            // But strict requirement is: check remove_cover_image first.
+            // If both are present, we first remove, then upload new.
+            // Note: If remove_cover_image is NOT sent but a new file IS, we might orphan the old file.
+            // For now implementing per specific requirement.
+
             const cover_image_uuid = randomUUID();
             const arrayBuffer = await file.arrayBuffer();
             await service.uploadCoverImage(arrayBuffer, cover_image_uuid);
