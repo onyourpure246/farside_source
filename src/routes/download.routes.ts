@@ -407,6 +407,7 @@ dlRouter.post('/file', async (c) => {
 
 		// Extract form fields
 		const parent = formData.get('parent');
+		const category_id = formData.get('category_id');
 		const name = formData.get('name') as string;
 		const description = formData.get('description') as string | null;
 		const file = formData.get('file') as File;
@@ -441,6 +442,7 @@ dlRouter.post('/file', async (c) => {
 		// Create database record
 		const fileData: CreateFileRequest = {
 			parent: parent ? parseInt(parent as string) : null,
+			category_id: category_id ? parseInt(category_id as string) : null,
 			name: name,
 			description: description || undefined,
 			filename: file.name,

@@ -39,7 +39,9 @@ export function initializeDatabase(config: DatabaseConfig): mysql.Pool {
 		enableKeepAlive: true,
 		keepAliveInitialDelay: 0,
 		// Debug logging for connection events (optional)
-		debug: false
+		debug: false,
+		timezone: '+07:00',
+		dateStrings: true
 	});
 
 	pool.on('connection', (connection) => {

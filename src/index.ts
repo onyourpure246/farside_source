@@ -11,6 +11,7 @@ import employeeRouter from './routes/employee.routes';
 import userRouter from './routes/user.routes';
 import dashboardRouter from './routes/dashboard.routes';
 import searchRouter from './routes/search.routes';
+import categoryRouter from './routes/category.routes';
 
 // Load environment variables
 dotenv.config();
@@ -149,6 +150,7 @@ async function initialize() {
 	app.route('/api/fy2569/users', userRouter); // User Management (Admin)
 	app.route('/api/fy2569/dashboard', dashboardRouter); // Admin Dashboard
 	app.route('/api/fy2569/search', searchRouter); // Search Tracking & Popular Tags
+	app.route('/api/fy2569/category', categoryRouter); // Document Categories
 
 
 	// Start server

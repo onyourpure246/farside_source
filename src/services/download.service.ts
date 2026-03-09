@@ -56,9 +56,11 @@ export class DownloadService {
 						   ORDER BY f.abbr ASC`;
 
 		const fileSql = `SELECT f.*, 
+								cat.name as category_name,
 								CONCAT(c.firstname, ' ', c.lastname) as created_by_name,
 								CONCAT(u.firstname, ' ', u.lastname) as updated_by_name
 						 FROM dl_files f
+						 LEFT JOIN dl_categories cat ON f.category_id = cat.id
 						 LEFT JOIN common_users c ON f.created_by = c.id
 						 LEFT JOIN common_users u ON f.updated_by = u.id
 						 WHERE f.parent ${folderId === null ? 'IS NULL' : '= ?'} ${activeClause} 
@@ -242,9 +244,11 @@ export class DownloadService {
 
 	async getFileById(id: number, viewMode: 'public' | 'admin' | 'all' = 'public'): Promise<DLFile | null> {
 		let sql = `SELECT f.*, 
+						  cat.name as category_name,
 						  CONCAT(c.firstname, ' ', c.lastname) as created_by_name,
 						  CONCAT(u.firstname, ' ', u.lastname) as updated_by_name
 				   FROM dl_files f
+				   LEFT JOIN dl_categories cat ON f.category_id = cat.id
 				   LEFT JOIN common_users c ON f.created_by = c.id
 				   LEFT JOIN common_users u ON f.updated_by = u.id
 				   WHERE f.id = ?`;
@@ -279,9 +283,9 @@ export class DownloadService {
 		const createdBy = data.created_by || null;
 
 		const result = await execute(
-			`INSERT INTO dl_files (parent, name, description, filename, sysname, mui_icon, mui_colour, isactive, downloads, created_by, updated_by, created_at, updated_at)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, NOW(), NOW())`,
-			[data.parent || null, data.name, data.description || null, data.filename, data.sysname, muiIcon, muiColour, isactive, createdBy, createdBy]
+			`INSERT INTO dl_files (parent, category_id, name, description, filename, sysname, mui_icon, mui_colour, isactive, downloads, created_by, updated_by, created_at, updated_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, NOW(), NOW())`,
+			[data.parent || null, data.category_id || null, data.name, data.description || null, data.filename, data.sysname, muiIcon, muiColour, isactive, createdBy, createdBy]
 		);
 
 		// Fetch the created file, ignoring active check
@@ -297,6 +301,10 @@ export class DownloadService {
 		if (data.parent !== undefined) {
 			updates.push('parent = ?');
 			values.push(data.parent !== null ? parseInt(String(data.parent)) : null);
+		}
+		if (data.category_id !== undefined) {
+			updates.push('category_id = ?');
+			values.push(data.category_id !== null ? parseInt(String(data.category_id)) : null);
 		}
 		if (data.name !== undefined) {
 			updates.push('name = ?');

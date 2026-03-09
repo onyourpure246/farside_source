@@ -1,0 +1,7 @@
+﻿๐€ Testing News/Announcements System on http://localhost:64197/api/fy2569
+
+1๏ธโฃ  Testing POST /news (Create News)...
+
+--------------------------------
+
+โ ๏ธ Skipping remaining tests because creation failed.

@@ -60,6 +60,11 @@ newsRouter.post('/', async (c) => {
         const category = formData.get('category') as string;
         const status = (formData.get('status') as 'draft' | 'published') || 'published';
         const publish_date = formData.get('publish_date') as string;
+        let is_urgent = 0;
+        if (formData.has('is_urgent')) {
+            const val = formData.get('is_urgent');
+            if (val === 'true' || val === '1') is_urgent = 1;
+        }
 
         let cover_image_uuid = null;
 
@@ -84,6 +89,7 @@ newsRouter.post('/', async (c) => {
             category,
             status,
             publish_date,
+            is_urgent,
             cover_image: cover_image_uuid || undefined
         }, actor);
 
@@ -125,6 +131,11 @@ newsRouter.patch('/:id', async (c) => {
         if (formData.has('category')) updateData.category = formData.get('category');
         if (formData.has('status')) updateData.status = formData.get('status');
         if (formData.has('publish_date')) updateData.publish_date = formData.get('publish_date');
+
+        if (formData.has('is_urgent')) {
+            const val = formData.get('is_urgent');
+            updateData.is_urgent = (val === 'true' || val === '1') ? 1 : 0;
+        }
 
         // Handle cover image removal
         if (formData.get('remove_cover_image') === 'true') {

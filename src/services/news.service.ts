@@ -29,8 +29,8 @@ export class NewsService {
 
     async createNews(data: CreateNewsRequest, createdBy: string = 'Admin'): Promise<NewsItem> {
         const result = await execute(
-            `INSERT INTO common_news (title, content, category, cover_image, status, publish_date, isactive, created_by, created_at, updated_by, updated_at)
-			 VALUES (?, ?, ?, ?, ?, ?, 1, ?, NOW(), ?, NOW())`,
+            `INSERT INTO common_news (title, content, category, cover_image, status, publish_date, is_urgent, isactive, created_by, created_at, updated_by, updated_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, NOW(), ?, NOW())`,
             [
                 data.title,
                 data.content || null,
@@ -38,6 +38,7 @@ export class NewsService {
                 data.cover_image || null,
                 data.status || 'published',
                 data.publish_date || new Date().toISOString().slice(0, 19).replace('T', ' '),
+                data.is_urgent !== undefined ? data.is_urgent : 0,
                 createdBy,
                 createdBy
             ]
@@ -75,6 +76,10 @@ export class NewsService {
         if (data.publish_date !== undefined) {
             updates.push('publish_date = ?');
             values.push(data.publish_date);
+        }
+        if (data.is_urgent !== undefined) {
+            updates.push('is_urgent = ?');
+            values.push(data.is_urgent);
         }
         if (data.isactive !== undefined) {
             updates.push('isactive = ?');

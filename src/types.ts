@@ -162,6 +162,7 @@ export interface NewsItem {
 	status: 'draft' | 'published' | 'archived';
 	publish_date: string; // MySQL datetime string
 	view_count: number;
+	is_urgent: number;
 	isactive: number;
 	created_by: string | null;
 	created_at: string;
@@ -177,6 +178,7 @@ export interface CreateNewsRequest {
 	cover_image?: string; // UUID of uploaded file
 	status?: 'draft' | 'published' | 'archived';
 	publish_date?: string;
+	is_urgent?: number;
 }
 
 export interface UpdateNewsRequest {
@@ -186,6 +188,7 @@ export interface UpdateNewsRequest {
 	cover_image?: string;
 	status?: 'draft' | 'published' | 'archived';
 	publish_date?: string;
+	is_urgent?: number;
 	isactive?: number;
 }
 
@@ -208,10 +211,11 @@ export interface DLFolder {
 	updated_at: string;
 }
 
-// GET https://casdu-backops.witspleasure.com/api/fy2569/dl/file/:id
 export interface DLFile {
 	id: number;
 	parent: number | null;
+	category_id: number | null;
+	category_name?: string | null;
 	name: string;
 	description: string | null;
 	filename: string;
@@ -229,6 +233,24 @@ export interface DLFile {
 export interface FolderContentResponse {
 	folders: DLFolder[];
 	files: DLFile[];
+}
+
+export interface DLCategory {
+	id: number;
+	name: string;
+	isactive: number;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CreateCategoryRequest {
+	name: string;
+	isactive?: number;
+}
+
+export interface UpdateCategoryRequest {
+	name?: string;
+	isactive?: number;
 }
 
 // Request/Response DTOs - Download
@@ -257,6 +279,7 @@ export interface UpdateFolderRequest {
 
 export interface CreateFileRequest {
 	parent?: number | null;
+	category_id?: number | null;
 	name: string;
 	description?: string;
 	filename: string;
@@ -269,6 +292,7 @@ export interface CreateFileRequest {
 
 export interface UpdateFileRequest {
 	parent?: number | null;
+	category_id?: number | null;
 	name?: string;
 	description?: string;
 	filename?: string;
@@ -282,6 +306,7 @@ export interface UpdateFileRequest {
 // File Upload Request (for multipart/form-data)
 export interface UploadFileRequest {
 	parent?: number | null;
+	category_id?: number | null;
 	name: string;
 	description?: string;
 	file: File; // The actual file to upload

@@ -25,6 +25,7 @@ async function testNewsSystem() {
         formData.append('content', '<p>This is a test announcement created via script.</p>');
         formData.append('category', 'Test Category');
         formData.append('status', 'published');
+        formData.append('is_urgent', '1');
 
         // Dummy cover image
         const fileContent = 'COVER_IMAGE_DATA_' + new Date().toISOString();
@@ -72,6 +73,7 @@ async function testNewsSystem() {
             console.log('✅ Found News:', json.data.title);
             console.log('✅ Category:', json.data.category);
             console.log('✅ Created By:', json.data.created_by);
+            console.log('✅ Is Urgent:', json.data.is_urgent);
             if (json.data.cover_image === coverImageUuid) {
                 console.log('✅ Cover Image verified.');
             }
@@ -90,6 +92,7 @@ async function testNewsSystem() {
         const formData = new FormData();
         formData.append('title', 'Updated News Title');
         formData.append('category', 'Updated Category');
+        formData.append('is_urgent', '0');
 
         const res = await fetch(`${BASE_URL}/news/${createdId}`, {
             method: 'PATCH',
@@ -102,6 +105,7 @@ async function testNewsSystem() {
             console.log('✅ Updated Title:', json.data.title);
             console.log('✅ Updated Category:', json.data.category);
             console.log('✅ Updated By:', json.data.updated_by);
+            console.log('✅ Updated Is Urgent:', json.data.is_urgent);
         } else {
             console.error('❌ Failed:', res.status, res.statusText);
         }
