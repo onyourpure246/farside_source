@@ -238,6 +238,7 @@ export interface FolderContentResponse {
 export interface DLCategory {
 	id: number;
 	name: string;
+	group_name: string;
 	isactive: number;
 	created_at: string;
 	updated_at: string;
@@ -245,11 +246,13 @@ export interface DLCategory {
 
 export interface CreateCategoryRequest {
 	name: string;
+	group_name?: string;
 	isactive?: number;
 }
 
 export interface UpdateCategoryRequest {
 	name?: string;
+	group_name?: string;
 	isactive?: number;
 }
 

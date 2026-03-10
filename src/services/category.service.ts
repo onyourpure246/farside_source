@@ -22,11 +22,12 @@ export class CategoryService {
 
     async createCategory(data: CreateCategoryRequest): Promise<DLCategory> {
         const isactive = data.isactive !== undefined ? data.isactive : 1;
+        const groupName = data.group_name || 'เอกสารต่างๆ';
 
         const result = await execute(
-            `INSERT INTO dl_categories (name, isactive, created_at, updated_at) 
-			 VALUES (?, ?, NOW(), NOW())`,
-            [data.name, isactive]
+            `INSERT INTO dl_categories (name, group_name, isactive, created_at, updated_at) 
+			 VALUES (?, ?, ?, NOW(), NOW())`,
+            [data.name, groupName, isactive]
         );
 
         const created = await this.getCategoryById(result.insertId);
@@ -41,6 +42,10 @@ export class CategoryService {
         if (data.name !== undefined) {
             updates.push('name = ?');
             values.push(data.name);
+        }
+        if (data.group_name !== undefined) {
+            updates.push('group_name = ?');
+            values.push(data.group_name);
         }
         if (data.isactive !== undefined) {
             updates.push('isactive = ?');
