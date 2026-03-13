@@ -1,6 +1,9 @@
+import dotenv from 'dotenv';
+// Load environment variables immediately
+dotenv.config();
+
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import dotenv from 'dotenv';
 import { initializeDatabase, testConnection } from './services/database.service';
 import { initializeFileStorage } from './services/file-storage.service';
 import { corsMiddleware } from './middleware/cors.middleware';
@@ -12,9 +15,6 @@ import userRouter from './routes/user.routes';
 import dashboardRouter from './routes/dashboard.routes';
 import searchRouter from './routes/search.routes';
 import categoryRouter from './routes/category.routes';
-
-// Load environment variables
-dotenv.config();
 
 // Initialize database connection
 const dbConfig = {

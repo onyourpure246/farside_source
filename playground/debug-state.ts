@@ -1,6 +1,6 @@
-import { queryOne, initializeDatabase, closeDatabase } from './services/database.service';
+import { queryOne, initializeDatabase, closeDatabase } from '../src/services/database.service';
 import * as dotenv from 'dotenv';
-import { CommonUser } from './types';
+import { CommonUser } from '../src/types';
 
 dotenv.config();
 

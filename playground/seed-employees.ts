@@ -1,4 +1,4 @@
-import { execute, initializeDatabase, closeDatabase } from './services/database.service';
+import { execute, initializeDatabase, closeDatabase } from '../src/services/database.service';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';

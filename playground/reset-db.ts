@@ -1,4 +1,4 @@
-import { execute, query, initializeDatabase, closeDatabase } from './services/database.service';
+import { execute, query, initializeDatabase, closeDatabase } from '../src/services/database.service';
 import * as dotenv from 'dotenv';
 import * as readline from 'readline';
 

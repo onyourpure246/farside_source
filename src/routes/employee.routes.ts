@@ -31,31 +31,28 @@ router.post('/verify', async (c) => {
         // Initialize AuthService (JWT secret is not strictly needed for this lookup but required by constructor)
         const jwtSecret = process.env.JWT_SECRET || 'temp-secret';
         const authService = new AuthService(jwtSecret);
+        const { cadApiService } = await import('../services/cad-api.service');
 
-        // 1. STRICT: Check Employee Table (HR Source of Truth)
-        // We MUST verify against the employees table first. Use database service directly.
-        const { queryOne, execute } = await import('../services/database.service');
+        // 1. STRICT: Check CAD API (via cad-api.service)
+        const cadEmployees = await cadApiService.executeEndpoint<any[]>('telephone_by_id', { 
+            card_id: pid 
+        });
 
-        const employee = await queryOne<{
-            id: number;
-            cid: string;
-            firstname: string;
-            lastname: string;
-            email: string;
-            position: string;
-            isactive: number;
-        }>('SELECT * FROM employees WHERE cid = ?', [pid]);
-
-        // If not found or inactive -> REJECT
-        if (!employee || employee.isactive !== 1) {
+        // If not found -> REJECT
+        if (!cadEmployees || cadEmployees.length === 0) {
             return c.json<ApiResponse<null>>({
                 success: false,
-                error: 'Unauthorized: Employee not found or inactive'
+                error: 'Unauthorized: Employee not found in CAD database'
             }, 401);
         }
 
+        const employee = cadEmployees[0];
+
         // 2. Employee Validated. Now handle Auto-Register / Sync
         let user = await authService.getUserByUsername(pid);
+        const { execute } = await import('../services/database.service');
+
+        const displayname = `${employee.t_front || ''}${employee.t_name} ${employee.t_surname}`;
 
         if (!user) {
             // CASE A: Auto-Register (New User)
@@ -64,11 +61,11 @@ router.post('/verify', async (c) => {
             const newUser = await authService.createUser(
                 pid,
                 randomPassword,
-                `${employee.firstname} ${employee.lastname}`,
-                employee.firstname,
-                employee.lastname,
-                employee.email,
-                employee.position,
+                displayname,
+                employee.t_name,
+                employee.t_surname,
+                `${pid}@cad.go.th`,
+                employee.t_position,
                 'user',
                 'active',
                 0
@@ -78,9 +75,9 @@ router.post('/verify', async (c) => {
             // CASE B: User Exists -> Sync latest info from HR (Optional but good practice)
             await execute(
                 `UPDATE common_users 
-                 SET firstname = ?, lastname = ?, email = ?, jobtitle = ?, updated_at = NOW() 
+                 SET firstname = ?, lastname = ?, displayname = ?, jobtitle = ?, updated_at = NOW() 
                  WHERE id = ?`,
-                [employee.firstname, employee.lastname, employee.email, employee.position, user.id]
+                [employee.t_name, employee.t_surname, displayname, employee.t_position, user.id]
             );
             // Refresh user object
             user = await authService.getUserById(user.id) as any;

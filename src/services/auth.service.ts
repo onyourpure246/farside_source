@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { CommonUser, SafeUser } from '../types';
 import { query, queryOne, execute } from './database.service';
+import { cadApiService } from './cad-api.service';
 
 /**
  * Authentication Service
@@ -192,35 +193,35 @@ export class AuthService {
 			return (await this.getUserById(existingUser.id))!;
 		}
 
-		// Step 2: User not found locally -> Check Employee Table (New User)
-		// Assuming we have an 'employees' table populated from HR
-		const employee = await queryOne<{
-			id: number;
-			cid: string;
-			firstname: string;
-			lastname: string;
-			email: string;
-			position: string;
-		}>('SELECT * FROM employees WHERE cid = ?', [cid]);
+		// Step 2: User not found locally -> Check CAD API (via cad-api.service)
+		// We use the endpoint name and parameter confirmed from testing
+		const cadEmployees = await cadApiService.executeEndpoint<any[]>('telephone_by_id', { 
+			card_id: cid 
+		});
 
-		if (!employee) {
-			throw new Error('Unauthorized: CID not found in employee database');
+		if (!cadEmployees || cadEmployees.length === 0) {
+			throw new Error('Unauthorized: CID not found in CAD database');
 		}
 
+		// Take the first result
+		const employee = cadEmployees[0];
+
 		// CASE B: New User -> Insert
-		// Default role = 'user', status = 'active', password = 'thaid_login' (random or placeholder)
+		// Mapping CAD API fields to Farside database structure
 		const randomPassword = Math.random().toString(36).slice(-8);
+		const displayname = `${employee.t_front || ''}${employee.t_name} ${employee.t_surname}`;
+		
 		return await this.createUser(
 			cid,
-			randomPassword, // password
-			`${employee.firstname} ${employee.lastname}`, // displayname
-			employee.firstname,
-			employee.lastname,
-			employee.email,
-			employee.position, // jobtitle
-			'user', // role
-			'active', // status
-			0 // isadmin
+			randomPassword,
+			displayname,
+			employee.t_name,
+			employee.t_surname,
+			`${cid}@cad.go.th`, // Placeholder email as API doesn't provide one
+			employee.t_position,
+			'user',
+			'active',
+			0
 		);
 	}
 
@@ -230,33 +231,26 @@ export class AuthService {
 	 */
 	private async syncUserWithHR(cid: string, userId: number): Promise<void> {
 		try {
-			const employee = await queryOne<{
-				id: number;
-				cid: string;
-				firstname: string;
-				lastname: string;
-				email: string;
-				position: string;
-			}>('SELECT * FROM employees WHERE cid = ?', [cid]);
+			const cadEmployees = await cadApiService.executeEndpoint<any[]>('telephone_by_id', { 
+				card_id: cid 
+			});
 
-			if (employee) {
-				// Found in HR -> Update details
+			if (cadEmployees && cadEmployees.length > 0) {
+				const employee = cadEmployees[0];
+				
+				// Found in CAD -> Update details
 				await execute(
 					`UPDATE common_users 
-                     SET firstname = ?, lastname = ?, email = ?, jobtitle = ?, updated_at = NOW() 
+                     SET firstname = ?, lastname = ?, jobtitle = ?, updated_at = NOW() 
                      WHERE id = ?`,
-					[employee.firstname, employee.lastname, employee.email, employee.position, userId]
+					[employee.t_name, employee.t_surname, employee.t_position, userId]
 				);
-				// console.log(`[Background Sync] User ${cid} updated successfully.`);
 			} else {
 				// Not found in HR -> User might have resigned?
-				// Option: Auto-deactivate user?
-				// For now, let's just log a warning
-				console.warn(`[Background Sync] User ${cid} not found in HR database. Possible resignation.`);
+				console.warn(`[Background Sync] User ${cid} not found in CAD API. Possible resignation.`);
 			}
 		} catch (error) {
 			console.error(`[Background Sync] Error syncing user ${cid}:`, error);
-			throw error;
 		}
 	}
 

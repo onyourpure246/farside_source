@@ -422,3 +422,20 @@ export interface CreateTaskTagRequest {
 	task_id: number;
 	tag_id: number;
 }
+// ============================================================================
+// FEATURE: CAD API INTEGRATION
+// ============================================================================
+export interface CadLoginResponse {
+	accessToken: string;
+	encrypt_key: string;
+	expires_in: number;
+}
+
+export interface CadExecuteResponse {
+	status: boolean;
+	result?: boolean;
+	message?: string;
+	data?: string;
+	datatype?: string;
+	totalRow?: number;
+}

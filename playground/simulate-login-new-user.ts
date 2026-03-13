@@ -1,7 +1,7 @@
-import { execute, initializeDatabase, closeDatabase } from './services/database.service';
-import { AuthService } from './services/auth.service';
+import { execute, initializeDatabase, closeDatabase } from '../src/services/database.service';
+import { AuthService } from '../src/services/auth.service';
 import * as dotenv from 'dotenv';
-import { SafeUser } from './types';
+import { SafeUser } from '../src/types';
 
 dotenv.config();
 

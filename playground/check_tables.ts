@@ -1,4 +1,4 @@
-import { initializeDatabase, query, closeDatabase } from './services/database.service';
+import { initializeDatabase, query, closeDatabase } from '../src/services/database.service';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
