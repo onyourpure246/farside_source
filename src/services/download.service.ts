@@ -173,7 +173,7 @@ export class DownloadService {
 		}
 
 		if (updates.length === 0) {
-			const folder = await this.getFolderById(id);
+			const folder = await this.getFolderById(id, 'all');
 			if (!folder) throw new Error('Folder not found');
 			return folder;
 		}
@@ -186,7 +186,7 @@ export class DownloadService {
 			values
 		);
 
-		const folder = await this.getFolderById(id);
+		const folder = await this.getFolderById(id, 'all');
 		if (!folder) throw new Error('Folder not found');
 		return folder;
 	}
@@ -340,7 +340,7 @@ export class DownloadService {
 		}
 
 		if (updates.length === 0) {
-			const file = await this.getFileById(id);
+			const file = await this.getFileById(id, 'all');
 			if (!file) throw new Error('File not found');
 			return file;
 		}
@@ -353,7 +353,7 @@ export class DownloadService {
 			values
 		);
 
-		const file = await this.getFileById(id);
+		const file = await this.getFileById(id, 'all');
 		if (!file) throw new Error('File not found');
 		return file;
 	}

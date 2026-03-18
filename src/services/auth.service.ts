@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { CommonUser, SafeUser } from '../types';
 import { query, queryOne, execute } from './database.service';
 import { cadApiService } from './cad-api.service';
-
+import { hashPID, maskPID } from '../utils/crypto.util';
 /**
  * Authentication Service
  * Handles user authentication, password hashing/verification, and JWT token generation
@@ -80,16 +80,9 @@ export class AuthService {
 	private toSafeUser(user: CommonUser): SafeUser {
 		const { password, ...safeUser } = user;
 
-		// Mask CID if it's 13 digits
+		// Mask CID if it's 13 digits (for backward compatibility if not migrated yet)
 		if (/^\d{13}$/.test(safeUser.username)) {
-			// Format: 1-XXXX-XXXXX-XX-X (Masking most digits)
-			// Or simpler: 1-XXXX-XXXXX-12-3 (showing very first and very last few)
-			// Let's go with: First 1 digit, then masked, then last 3 digits
-			// Original: 1 234 56789 01 2 3
-			// Masked:   1-XXXX-XXXXX-12-3
-			const first = safeUser.username.substring(0, 1);
-			const last3 = safeUser.username.substring(10);
-			safeUser.username = `${first}-XXXX-XXXXX-${last3.substring(0, 2)}-${last3.substring(2)}`;
+			safeUser.username = maskPID(safeUser.username);
 		}
 
 		return safeUser;
@@ -111,10 +104,26 @@ export class AuthService {
 	 * Get user by username
 	 */
 	async getUserByUsername(username: string): Promise<CommonUser | null> {
-		return await queryOne<CommonUser>(
+		let user = await queryOne<CommonUser>(
 			'SELECT * FROM common_users WHERE username = ?',
 			[username]
 		);
+
+		// Auto-heal logic: If a 64-character hash is searched, but only a truncated 50-character hash exists in DB
+		if (!user && username.length === 64) {
+			const truncatedHash = username.substring(0, 50);
+			user = await queryOne<CommonUser>(
+				'SELECT * FROM common_users WHERE username = ?',
+				[truncatedHash]
+			);
+			if (user) {
+				console.log(`[Auto-Heal] Upgrading truncated hash for user ID ${user.id} to full 64 characters`);
+				await execute('UPDATE common_users SET username = ? WHERE id = ?', [username, user.id]);
+				user.username = username; // Update object in memory
+			}
+		}
+
+		return user;
 	}
 
 	/**
@@ -173,7 +182,8 @@ export class AuthService {
 	 */
 	async upsertThaIDUser(cid: string): Promise<SafeUser> {
 		// Step 1: Check Local DB First (Availability Priority)
-		const existingUser = await this.getUserByUsername(cid);
+		const hashedCid = hashPID(cid);
+		const existingUser = await this.getUserByUsername(hashedCid);
 
 		if (existingUser) {
 			// CASE A: User exists locally
@@ -195,33 +205,41 @@ export class AuthService {
 
 		// Step 2: User not found locally -> Check CAD API (via cad-api.service)
 		// We use the endpoint name and parameter confirmed from testing
-		const cadEmployees = await cadApiService.executeEndpoint<any[]>('telephone_by_id', { 
-			card_id: cid 
+		const cadEmployees = await cadApiService.executeEndpoint<any[]>('telephone_by_id', {
+			card_id: cid
 		});
 
 		if (!cadEmployees || cadEmployees.length === 0) {
 			throw new Error('Unauthorized: CID not found in CAD database');
 		}
 
-		// Take the first result
 		const employee = cadEmployees[0];
 
 		// CASE B: New User -> Insert
 		// Mapping CAD API fields to Farside database structure
 		const randomPassword = Math.random().toString(36).slice(-8);
+
 		const displayname = `${employee.t_front || ''}${employee.t_name} ${employee.t_surname}`;
 		
+		const isSuperAdmin = cid === process.env.SUPER_ADMIN_PID;
+		const role = isSuperAdmin ? 'admin' : 'user';
+		const isadmin = isSuperAdmin ? 1 : 0;
+
+		if (isSuperAdmin) {
+			console.log(`[Auto-Register] Granting SUPER ADMIN rights to CID: ${cid}`);
+		}
+
 		return await this.createUser(
-			cid,
+			hashedCid, // Using hashed CID for DB storage
 			randomPassword,
 			displayname,
 			employee.t_name,
 			employee.t_surname,
-			`${cid}@cad.go.th`, // Placeholder email as API doesn't provide one
+			`${maskPID(cid)}@cad.go.th`, // Placeholder with masked PID
 			employee.t_position,
-			'user',
+			role,
 			'active',
-			0
+			isadmin
 		);
 	}
 
@@ -231,13 +249,13 @@ export class AuthService {
 	 */
 	private async syncUserWithHR(cid: string, userId: number): Promise<void> {
 		try {
-			const cadEmployees = await cadApiService.executeEndpoint<any[]>('telephone_by_id', { 
-				card_id: cid 
+			const cadEmployees = await cadApiService.executeEndpoint<any[]>('telephone_by_id', {
+				card_id: cid
 			});
 
 			if (cadEmployees && cadEmployees.length > 0) {
 				const employee = cadEmployees[0];
-				
+
 				// Found in CAD -> Update details
 				await execute(
 					`UPDATE common_users 
@@ -258,7 +276,8 @@ export class AuthService {
 	 * Login user with username and password
 	 */
 	async login(username: string, password: string): Promise<{ token: string; user: SafeUser } | null> {
-		const user = await this.getUserByUsername(username);
+		const lookupUsername = /^\d{13}$/.test(username.trim()) ? hashPID(username.trim()) : username;
+		const user = await this.getUserByUsername(lookupUsername);
 		if (!user) {
 			return null;
 		}

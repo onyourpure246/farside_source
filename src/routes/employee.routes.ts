@@ -4,7 +4,7 @@ import { dualAuthMiddleware } from '../middleware/dual-auth.middleware';
 import type { AuthContext } from '../middleware/dual-auth.middleware';
 import { ApiResponse, SafeUser } from '../types';
 import { LogService } from '../services/log.service';
-
+import { hashPID, maskPID } from '../utils/crypto.util';
 
 const router = new Hono<AuthContext>();
 
@@ -34,8 +34,8 @@ router.post('/verify', async (c) => {
         const { cadApiService } = await import('../services/cad-api.service');
 
         // 1. STRICT: Check CAD API (via cad-api.service)
-        const cadEmployees = await cadApiService.executeEndpoint<any[]>('telephone_by_id', { 
-            card_id: pid 
+        const cadEmployees = await cadApiService.executeEndpoint<any[]>('telephone_by_id', {
+            card_id: pid
         });
 
         // If not found -> REJECT
@@ -49,38 +49,50 @@ router.post('/verify', async (c) => {
         const employee = cadEmployees[0];
 
         // 2. Employee Validated. Now handle Auto-Register / Sync
-        let user = await authService.getUserByUsername(pid);
+        const hashedPid = hashPID(pid);
+        let user = await authService.getUserByUsername(hashedPid);
         const { execute } = await import('../services/database.service');
 
         const displayname = `${employee.t_front || ''}${employee.t_name} ${employee.t_surname}`;
 
         if (!user) {
             // CASE A: Auto-Register (New User)
-            console.log(`[Auto-Register] Creating new user for CID: ${pid}`);
+            console.log(`[Auto-Register] Creating new user for CID: Hash(${hashedPid.substring(0, 8)}...)`);
             const randomPassword = Math.random().toString(36).slice(-8); // Placeholder pw
+            
+            const isSuperAdmin = pid === process.env.SUPER_ADMIN_PID;
+            const role = isSuperAdmin ? 'admin' : 'user';
+            const isadmin = isSuperAdmin ? 1 : 0;
+
+            if (isSuperAdmin) {
+                console.log(`[Auto-Register] Granting SUPER ADMIN rights to CID: ${pid}`);
+            }
+
             const newUser = await authService.createUser(
-                pid,
+                hashedPid, // Using DB Hash
                 randomPassword,
                 displayname,
                 employee.t_name,
                 employee.t_surname,
-                `${pid}@cad.go.th`,
+                `${maskPID(pid)}@cad.go.th`, // Masked PID Email
                 employee.t_position,
-                'user',
+                role,
                 'active',
-                0
+                isadmin
             );
             user = (await authService.getUserById(newUser.id)) as any; // Cast for now, ensure types match
         } else {
             // CASE B: User Exists -> Sync latest info from HR (Optional but good practice)
-            await execute(
-                `UPDATE common_users 
-                 SET firstname = ?, lastname = ?, displayname = ?, jobtitle = ?, updated_at = NOW() 
-                 WHERE id = ?`,
-                [employee.t_name, employee.t_surname, displayname, employee.t_position, user.id]
-            );
-            // Refresh user object
-            user = await authService.getUserById(user.id) as any;
+            if (employee) {
+                await execute(
+                    `UPDATE common_users 
+                     SET firstname = ?, lastname = ?, displayname = ?, jobtitle = ?, updated_at = NOW() 
+                     WHERE id = ?`,
+                    [employee.t_name, employee.t_surname, displayname, employee.t_position, user.id]
+                );
+                // Refresh user object
+                user = await authService.getUserById(user.id) as any;
+            }
         }
 
         if (!user) {
