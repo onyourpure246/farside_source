@@ -85,15 +85,20 @@ dashboardRouter.get('/chart-data', async (c) => {
 
         // 2. Top Downloads (Top 5)
         // Linking resource_id (sysname) to dl_files.sysname
-        const topDownloads = await query<{ file_id: number, filename: string, download_count: number }>(`
+        const topDownloads = await query<{ file_id: number, filename: string, mui_icon: string, mui_colour: string, download_count: number }>(`
             SELECT 
-                f.id as file_id,
-                f.name as filename,
-                COUNT(l.id) as download_count
-            FROM common_activity_logs l
-            JOIN dl_files f ON l.resource_id = f.sysname
+                    f.id as file_id,
+                    f.name as name,
+                    f.filename as filename,
+                    f.mui_icon,
+                    f.mui_colour,
+                    COUNT(l.id) as download_count
+            FROM common_activity_logs l 
+            JOIN dl_files f ON 
+                (l.action = 'DOWNLOAD' AND l.resource_id = CAST(f.id AS CHAR))
+                OR (l.action = 'DOWNLOAD_UUID' AND l.resource_id = f.sysname)
             WHERE l.action IN ('DOWNLOAD', 'DOWNLOAD_UUID') 
-            GROUP BY f.id, f.name
+            GROUP BY f.id, f.name, f.mui_icon, f.mui_colour
             ORDER BY download_count DESC
             LIMIT 5
         `);
