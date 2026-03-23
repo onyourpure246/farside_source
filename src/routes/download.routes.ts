@@ -351,7 +351,7 @@ dlRouter.get('/file/:id', async (c) => {
 			try {
 				const logService = new LogService();
 				// user is already retrieved above
-				const userId = user?.id || null;
+				const userId = user?.id ?? null;
 				const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
 				const agent = c.req.header('user-agent');
 
@@ -369,11 +369,14 @@ dlRouter.get('/file/:id', async (c) => {
 				// Continue serving file even if logging fails
 			}
 
+			// Encode filename to support Thai/Unicode characters in HTTP Headers
+			const encodedFilename = encodeURIComponent(file.filename);
+			
 			// Return the file with appropriate headers
 			return new Response(fileContent, {
 				headers: {
 					'Content-Type': 'application/octet-stream',
-					'Content-Disposition': `attachment; filename="${file.filename}"`,
+					'Content-Disposition': `attachment; filename*=UTF-8''${encodedFilename}`,
 					'Content-Length': fileContent.byteLength.toString(),
 				},
 			});

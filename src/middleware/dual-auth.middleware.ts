@@ -46,11 +46,13 @@ export async function dualAuthMiddleware(c: Context<AuthContext>, next: Next) {
 
 	// Check if it's the technical auth secret
 	if (token === authSecret) {
-		// Mock a system user for context to ensure logging works
+		const forwardedUserStr = c.req.header('X-Forwarded-User');
+		const forwardedUserId = forwardedUserStr ? parseInt(forwardedUserStr, 10) : 0;
+		// Mock a system user for context to ensure logging works (override id if forwarded)
 		const systemUser: SafeUser = {
-			id: 0,
-			username: 'system',
-			displayname: 'System Administrator',
+			id: forwardedUserId,
+			username: forwardedUserId ? `user_${forwardedUserId}` : 'system',
+			displayname: forwardedUserId ? 'System (Forwarded User)' : 'System Administrator',
 			firstname: 'System',
 			lastname: 'Admin',
 			email: 'system@localhost',
@@ -206,11 +208,13 @@ export async function adminAuthMiddleware(c: Context<AuthContext>, next: Next) {
 
 	// 1. System/Server-to-Server Admin Access (using AUTH_SECRET)
 	if (token === authSecret) {
+		const forwardedUserStr = c.req.header('X-Forwarded-User');
+		const forwardedUserId = forwardedUserStr ? parseInt(forwardedUserStr, 10) : 0;
 		// Mock a super-admin user for the context
 		const systemAdmin = {
-			id: 0,
-			username: 'system',
-			displayname: 'System Administrator',
+			id: forwardedUserId,
+			username: forwardedUserId ? `admin_${forwardedUserId}` : 'system',
+			displayname: forwardedUserId ? 'System Admin (Forwarded)' : 'System Administrator',
 			firstname: 'System',
 			lastname: 'Admin',
 			email: 'system@localhost',
@@ -292,10 +296,12 @@ export async function optionalAuthMiddleware(c: Context<AuthContext>, next: Next
 
 	// 1. System/Technical Access
 	if (token === authSecret) {
+		const forwardedUserStr = c.req.header('X-Forwarded-User');
+		const forwardedUserId = forwardedUserStr ? parseInt(forwardedUserStr, 10) : 0;
 		const systemUser: SafeUser = {
-			id: 0,
-			username: 'system',
-			displayname: 'System',
+			id: forwardedUserId,
+			username: forwardedUserId ? `user_${forwardedUserId}` : 'system',
+			displayname: forwardedUserId ? 'System (Forwarded)' : 'System',
 			firstname: 'System',
 			lastname: 'User',
 			email: 'system@localhost',

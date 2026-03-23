@@ -97,7 +97,7 @@ newsRouter.post('/', async (c) => {
         try {
             const logService = new LogService();
             const user = c.get('user') as SafeUser | undefined;
-            const userId = user?.id || null;
+            const userId = user?.id ?? null;
             const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
             const agent = c.req.header('user-agent');
             await logService.logActivity(
@@ -174,7 +174,7 @@ newsRouter.patch('/:id', async (c) => {
         try {
             const logService = new LogService();
             const user = c.get('user') as SafeUser | undefined;
-            const userId = user?.id || null;
+            const userId = user?.id ?? null;
             const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
             const agent = c.req.header('user-agent');
             await logService.logActivity(

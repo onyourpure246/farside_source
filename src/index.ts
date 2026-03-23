@@ -81,7 +81,7 @@ async function initialize() {
 			const logService = new LogService();
 			// Try to get user from context if available (depends on when error occurred)
 			const user = (c as any).get('user');
-			const userId = user?.id || null;
+			const userId = user?.id ?? null;
 			const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
 			const userAgent = c.req.header('user-agent');
 

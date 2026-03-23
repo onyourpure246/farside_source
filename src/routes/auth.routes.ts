@@ -304,7 +304,7 @@ router.post('/logout', userAuthMiddleware, async (c) => {
 		const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
 		const userAgent = c.req.header('user-agent');
 		await logService.logActivity(
-			user?.id || null,
+			user?.id ?? null,
 			'LOGOUT',
 			'AUTH',
 			null,
