@@ -193,11 +193,16 @@ export class AuthService {
 				throw new Error('Unauthorized: Account is inactive or suspended');
 			}
 
-			// 1. Trigger Background Sync (Fire-and-Forget)
-			// We do NOT await this, so user gets response immediately
-			this.syncUserWithHR(cid, existingUser.id).catch(err => {
-				console.error(`[Background Sync] Failed to sync user ${cid}:`, err);
-			});
+			// 1. Trigger Background Sync if cache expired (24 hours)
+			const CACHE_MS = 24 * 60 * 60 * 1000;
+			const needsSync = Date.now() - new Date(existingUser.updated_at).getTime() > CACHE_MS;
+
+			if (needsSync) {
+				// We do NOT await this, so user gets response immediately
+				this.syncUserWithHR(cid, existingUser.id).catch(err => {
+					console.error(`[Background Sync] Failed to sync user ${cid}:`, err);
+				});
+			}
 
 			// 2. Return local user immediately
 			return (await this.getUserById(existingUser.id))!;
