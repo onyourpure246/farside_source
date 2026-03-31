@@ -59,7 +59,7 @@ async function initialize() {
 	}
 
 	// Create Hono app
-	const app = new Hono();
+	const app = new Hono().basePath('/casdu_cdm_backend');
 
 	// Apply CORS middleware to all routes
 	app.use('*', corsMiddleware);
