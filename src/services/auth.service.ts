@@ -225,7 +225,7 @@ export class AuthService {
 		const randomPassword = Math.random().toString(36).slice(-8);
 
 		const displayname = `${employee.t_front || ''}${employee.t_name} ${employee.t_surname}`;
-		
+
 		const isSuperAdmin = cid === process.env.SUPER_ADMIN_PID;
 		const role = isSuperAdmin ? 'admin' : 'user';
 		const isadmin = isSuperAdmin ? 1 : 0;
