@@ -35,7 +35,7 @@ DB_HOST=localhost
 DB_PORT=3306
 DB_USER=your_username
 DB_PASSWORD=your_password
-DB_NAME=casdu_db
+DB_NAME=casdu_cdm
 
 # ตั้งค่าเส้นทางพาธสำหรับเก็บไฟล์ที่อัพโหลดเข้ามาในระบบ
 FILE_UPLOAD_PATH=/path/to/upload/directory
@@ -45,7 +45,7 @@ AUTH_SECRET=your-auth-secret-key-change-in-production
 JWT_SECRET=your-jwt-secret-key-must-be-long-and-random-change-in-production
 
 # ตั้งค่า Server Port รูปแบบการทำงาน
-PORT=3000
+PORT=24991
 NODE_ENV=development
 ```
 
@@ -66,4 +66,4 @@ npm run dev
 ```
 
 ตรวจสอบการทำงานเบื้องต้นโดยเปิดเบราว์เซอร์ไปที่:
-`http://localhost:3000/health`
+`http://localhost:24991/casdu_cdm_backend/health`

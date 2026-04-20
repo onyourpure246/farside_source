@@ -1,29 +1,176 @@
 # โครงสร้างฐานข้อมูล (Database Schema)
 
-ระบบเชื่อมต่อกับ **MySQL** และมีโครงสร้างตารางข้อมูลแบ่งออกเป็น 3 หมวดหมู่หลักด้วยกันตามฟังก์ชันการรับผิดชอบ ได้แก่ Common Tables, Planner Tables, และ Download System Tables
+ระบบเชื่อมต่อกับ **MySQL** (หรือ MariaDB) ภายใต้ฐานข้อมูล `casdu_cdm` โดยโครงสร้างตารางข้อมูลแบ่งออกเป็นหมวดหมู่หลักดังนี้:
 
-## 1. Common Tables (ระดับระบบและผู้ใช้งาน)
+## Entity-Relationship Diagram (ERD)
 
-ส่วนนี้ใช้บันทึกข้อมูลพื้นฐาน ที่ระบบไหนก็สามารถเรียกใช้งานได้
+```mermaid
+erDiagram
+    common_users {
+        int id PK
+        varchar username UK
+        varchar password
+        varchar displayname
+        varchar firstname
+        varchar lastname
+        varchar email
+        varchar role
+        varchar status
+    }
+    
+    common_news {
+        int id PK
+        varchar title
+        text content
+        varchar category
+        varchar cover_image
+        varchar status
+        int view_count
+        tinyint is_urgent
+    }
 
-*   **`common_users`**: จัดเก็บข้อมูลผู้ใช้และระบบบัญชี, การเข้ารหัสผ่านลับ (Hash/Salt) และตัวยืนยันสิทธิ์ Role ของในระบบ
-*   **`common_participants`**: จัดเก็บข้อมูลบุคคลที่มีรายชื่อเชื่อมโยงกับการจัดการ (เช่น Stakeholders, ผู้รับผิดชอบ ภายนอก/ภายใน)
-*   **`common_tags`**: ป้ายกำกับ (Tags) หมวดหมู่กิจกรรมต่างๆ ใช้ร่วมกันในหลายจุดของระบบ
+    common_activity_logs {
+        int id PK
+        int user_id
+        varchar action
+        varchar resource_type
+        text details
+        varchar ip_address
+    }
+    
+    search_logs {
+        int id PK
+        int user_id
+        varchar keyword
+        int results_count
+    }
 
-## 2. Planner Tables (ระบบบริหารงาน)
+    dl_categories {
+        int id PK
+        varchar name
+        varchar group_name
+    }
 
-ส่วนนี้เก็บโครงสร้างของฟีเจอร์ Planner (การสั่งงาน/โปรเจกต์)
+    dl_folders {
+        int id PK
+        int parent FK "Nullable (Root)"
+        varchar abbr
+        varchar name
+        text description
+    }
 
-*   **`planner_projects`**: เก็บข้อมูลโปรเจกต์หรือแผนงานระดับใหญ่
-*   **`planner_tasks`**: เก็บข้อมูลงานย่อยที่แตกออกเป็นส่วนๆ (Task) ที่ซ้อนไว้ใต้ Project อีกที
-*   **`planner_task_participants`**: ตารางเพื่อเชื่อมต่อ (Intersection Table/Join Entity) ใช้ระบุว่า ใคร (Participant) รับผิดชอบงานย่อยไหน (Task) บ้าง แบบ Many-to-Many
-*   **`planner_task_tags`**: เชื่อมต่อเพื่อระบุว่างานไหนบ้างติด Tag ไหนบ้าง
+    dl_files {
+        int id PK
+        int parent FK
+        int category_id
+        varchar name
+        varchar filename
+        varchar sysname
+        int downloads
+    }
 
-## 3. Download System Tables (ระบบจัดการคลังเอกสาร)
+    dl_folders ||--o{ dl_folders : "has sub-folders"
+    dl_folders ||--o{ dl_files : "contains"
+```
 
-ส่วนเก็บโครงสร้างจำลองไฟล์และโฟลเดอร์ ซึ่งทำหน้าที่คู่ขนานกับพื้นที่ File System ของตัวเครื่อง (Physical Disk)
+# โครงสร้างฐานข้อมูล (Database Schema)
 
-*   **`dl_folders`**: โครงสร้างโฟลเดอร์สำหรับเก็บไฟล์ในระบบ สามารถซ้อนระดับ Hierarchy กันได้
-*   **`dl_files`**: ข้อมูล Metadata ของไฟล์ (เช่น ชื่อไฟล์, ชนิด MIME Type, ขนาด, ID ผู้ที่อัพโหลดขึ้นไป ฯลฯ) 
+ระบบเชื่อมต่อกับ **MySQL** (หรือ MariaDB) ภายใต้ฐานข้อมูล `casdu_cdm` โดยมีตารางหลักดังนี้
 
-*(หมายเหตุ: ระบบรับไฟล์ File Blob อัพโหลดจริงๆ แล้วเขียนลงบน Directory ตามโฟลเดอร์ที่กำหนดใน `FILE_UPLOAD_PATH` ส่วน `dl_files` จะเก็บเฉพาะ Path หรือ Hash เพื่อเชื่อมกลับไปยังไฟล์ตัวกลมๆ นั้น)*
+## 1. File System
+ตารางจัดเก็บข้อมูลเอกสาร หมวดหมู่ และโฟลเดอร์
+
+### `dl_categories` (หมวดหมู่)
+| Column | Type | Description |
+|---|---|---|
+| `id` | INT (PK) | รหัสหมวดหมู่ |
+| `name` | VARCHAR | ชื่อหมวดหมู่ |
+| `group_name` | VARCHAR | กลุ่มหมวดหมู่ (เช่น เอกสารต่างๆ) |
+| `isactive` | TINYINT | สถานะ (1=Active, 0=Inactive) |
+
+### `dl_folders` (โฟลเดอร์)
+| Column | Type | Description |
+|---|---|---|
+| `id` | INT (PK) | รหัสโฟลเดอร์ |
+| `abbr` | VARCHAR | ตัวย่อหรือรหัสโฟลเดอร์ |
+| `name` | VARCHAR | ชื่อโฟลเดอร์ |
+| `description` | TEXT | รายละเอียด |
+| `parent` | INT (FK) | รหัสโฟลเดอร์แม่ (NULL = Root) |
+| `mui_icon` | VARCHAR | ชื่อไอคอน |
+| `mui_colour` | VARCHAR | สีของไอคอน |
+| `isactive` | TINYINT | สถานะ (1=Active, 0=Inactive) |
+| `created_by` | INT | รหัสผู้สร้าง |
+
+### `dl_files` (ไฟล์)
+| Column | Type | Description |
+|---|---|---|
+| `id` | INT (PK) | รหัสไฟล์ |
+| `parent` | INT (FK) | รหัสโฟลเดอร์ที่อยู่ |
+| `category_id` | INT | รหัสหมวดหมู่ไฟล์ |
+| `name` | VARCHAR | ชื่อไฟล์ที่แสดงผล (Display Name) |
+| `description` | TEXT | รายละเอียดไฟล์ |
+| `filename` | VARCHAR | ชื่อไฟล์เต็มพร้อมนามสกุล |
+| `sysname` | VARCHAR | UUID หรือชื่อไฟล์ในระบบไฟล์เซิร์ฟเวอร์ |
+| `mui_icon` | VARCHAR | ชื่อไอคอน |
+| `mui_colour` | VARCHAR | สีของไอคอน |
+| `downloads` | INT | ยอดดาวน์โหลด |
+| `isactive` | TINYINT | สถานะ (1=Active, 0=Inactive) |
+| `created_by` | INT | รหัสผู้อัปโหลด |
+
+## 2. General Contents & User Management
+ตารางข้อมูลผู้ใช้งานและข่าวประชาสัมพันธ์
+
+### `common_users`
+| Column | Type | Description |
+|---|---|---|
+| `id` | INT (PK) | รหัสผู้ใช้ |
+| `username` | VARCHAR | ชื่อผู้ใช้/ระบบบัญชี (มักใช้ PID) |
+| `password` | VARCHAR | รหัสผ่านที่เข้ารหัสแล้ว (Hash) |
+| `displayname` | VARCHAR | ชื่อที่แสดงผล |
+| `firstname` | VARCHAR | ชื่อจริง |
+| `lastname` | VARCHAR | นามสกุล |
+| `email` | VARCHAR | อีเมล |
+| `jobtitle` | VARCHAR | ตำแหน่งงาน |
+| `isadmin` | TINYINT | 1=Admin, 0=User |
+| `role` | VARCHAR | บทบาท (admin, user) |
+| `status` | VARCHAR | สถานะบัญชี (active, inactive) |
+
+### `common_news`
+| Column | Type | Description |
+|---|---|---|
+| `id` | INT (PK) | รหัสข่าว |
+| `title` | VARCHAR | หัวข้อข่าว |
+| `content` | TEXT | เนื้อหาข่าว |
+| `category` | VARCHAR | หมวดหมู่ข่าว |
+| `cover_image` | VARCHAR | รูปภาพหน้าปก |
+| `status` | VARCHAR | สถานะของข่าว (published) |
+| `view_count` | INT | ยอดเข้าชม |
+| `is_urgent` | TINYINT | ข่าวด่วน (1=ด่วน, 0=ทั่วไป) |
+
+## 3. Logs & Analytics
+ตารางเก็บประวัติการใช้งานและบันทึกข้อผิดพลาดต่างๆ
+
+### `common_activity_logs`
+เก็บประวัติการใช้งานของ User และระบบ
+| Column | Type | Description |
+|---|---|---|
+| `id` | INT (PK) | รหัสล็อก |
+| `user_id` | INT | ผู้กระทำ (NULL ถ้าเป็น Anonymous) |
+| `level` | VARCHAR | ระดับความสำคัญ (e.g., INFO, ERROR) |
+| `action` | VARCHAR | การกระทำ (e.g., UPDATE_FILE) |
+| `resource_type` | VARCHAR | ประเภทของสิ่งที่ถูกกระทำ |
+| `resource_id` | VARCHAR | รหัสอ้างอิงสิ่งที่ถูกกระทำ |
+| `details` | TEXT | รายละเอียดเพิ่มเติม |
+| `ip_address` | VARCHAR | IP Address |
+| `user_agent` | TEXT | ข้อมูลเบราว์เซอร์หรืออุปกรณ์ |
+
+### `search_logs`
+เก็บคำค้นหาเพื่อนำไปวิเคราะห์ความนิยม
+| Column | Type | Description |
+|---|---|---|
+| `id` | INT (PK) | รหัสการค้นหา |
+| `keyword` | VARCHAR | คำค้นหา |
+| `user_id` | INT | ผู้ใช้งานที่ค้นหา |
+| `results_count` | INT | จำนวนผลลัพธ์ที่พบ |
+| `ip_address` | VARCHAR | IP Address |
+| `created_at` | TIMESTAMP | เวลาที่ค้นหา |

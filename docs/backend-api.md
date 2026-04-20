@@ -1,7 +1,7 @@
 # API และการใช้งาน (API Reference)
 
 เอกสารหน้านี้รวบรวมรายละเอียดของ API Endpoints ทั้งหมดที่มีอยู่ใน CASDU Far-Side API
-Base URL ของระบบตั้งต้นที่: `http://localhost:3000`
+Base URL ของระบบตั้งต้นที่: `http://localhost:24991/casdu_cdm_backend`
 
 ## การเชื่อมต่อกับ API
 

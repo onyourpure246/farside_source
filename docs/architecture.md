@@ -20,10 +20,12 @@ casdu_farside/
 │   │   ├── cors.middleware.ts      # การอนุญาต Cross-Origin Resource Sharing
 │   │   └── dual-auth.middleware.ts # บริหารจัดการ Token สองรูปแบบ (User / System)
 │   ├── routes/               # เส้นทางการเรียก API (Controller)
-│   │   ├── auth.routes.ts
 │   │   ├── commons.routes.ts
-│   │   ├── planner.routes.ts
-│   │   └── download.routes.ts
+│   │   ├── download.routes.ts
+│   │   ├── news.routes.ts
+│   │   ├── employee.routes.ts
+│   │   ├── user.routes.ts
+│   │   └── ...
 │   └── services/             # โลจิกฝั่ง Business logic และการเชื่อมต่อฐานข้อมูล
 │       ├── database.service.ts
 │       ├── file-storage.service.ts # ควบคุมการเขียน/อ่านไฟล์จาก Disk
