@@ -228,6 +228,7 @@ export interface DLFile {
 	created_at: string;
 	updated_by: number | null;
 	updated_at: string;
+	release_year?: string | null;
 }
 
 export interface FolderContentResponse {
@@ -276,6 +277,7 @@ export interface UpdateFolderRequest {
 	mui_icon?: string;
 	mui_colour?: string;
 	isactive?: number;
+	release_year?: string;
 	updated_by?: number;
 	created_by?: number;
 }
@@ -291,6 +293,7 @@ export interface CreateFileRequest {
 	mui_colour?: string;
 	isactive?: number;
 	created_by?: number;
+	release_year?: string;
 }
 
 export interface UpdateFileRequest {
@@ -302,6 +305,7 @@ export interface UpdateFileRequest {
 	mui_icon?: string;
 	mui_colour?: string;
 	isactive?: number;
+	release_year?: string;
 	updated_by?: number;
 	created_by?: number;
 }

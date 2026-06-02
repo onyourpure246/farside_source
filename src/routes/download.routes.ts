@@ -415,6 +415,7 @@ dlRouter.post('/file', async (c) => {
 		const description = formData.get('description') as string | null;
 		const file = formData.get('file') as File;
 		const isactiveVal = formData.get('isactive');
+		const release_year = formData.get('release_year') as string | null;
 
 		if (!name) {
 			return c.json<ApiResponse<null>>(
@@ -450,7 +451,8 @@ dlRouter.post('/file', async (c) => {
 			description: description || undefined,
 			filename: file.name,
 			sysname: sysname,
-			isactive: isactiveVal !== null ? parseInt(isactiveVal as string) : undefined
+			isactive: isactiveVal !== null ? parseInt(isactiveVal as string) : undefined,
+			release_year: release_year || undefined
 		};
 
 		const createdFile = await service.createFile(fileData);

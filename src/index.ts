@@ -1,5 +1,10 @@
 import dotenv from 'dotenv';
-// Load environment variables immediately
+import path from 'path';
+
+// Load environment variables based on NODE_ENV
+const isDev = process.env.NODE_ENV === 'development';
+dotenv.config({ path: isDev ? path.resolve(process.cwd(), '.env.development') : path.resolve(process.cwd(), '.env') });
+// Fallback to load default .env if some variables are missing in .env.development
 dotenv.config();
 
 import { Hono } from 'hono';

@@ -1,0 +1,332 @@
+
+> casdu-farside@1.0.0 test
+> vitest
+
+
+[1m[30m[44m DEV [49m[39m[22m [34mv4.1.5 [39m[90m/home/cdmoper/farside_source[39m
+
+ [31m❯[39m __tests__/routes/user.routes.test.ts [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m __tests__/routes/news.routes.test.ts [2m([22m[2m0 test[22m[2m)[22m
+[90mstdout[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2minitializeDatabase[2m > [22m[2mshould create a pool with the correct configuration
+[22m[39mInitializing database connection with config: {
+  host: [32m'localhost'[39m,
+  port: [33m3306[39m,
+  user: [32m'test_user'[39m,
+  database: [32m'test_db'[39m,
+  connectionLimit: [33m10[39m
+}
+
+[90mstdout[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2minitializeDatabase[2m > [22m[2mshould return the existing pool if already initialized
+[22m[39mInitializing database connection with config: {
+  host: [32m'localhost'[39m,
+  port: [33m3306[39m,
+  user: [32m'test_user'[39m,
+  database: [32m'test_db'[39m,
+  connectionLimit: [33m10[39m
+}
+
+[90mstdout[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2mgetDatabase[2m > [22m[2mshould return the pool if initialized
+[22m[39mInitializing database connection with config: {
+  host: [32m'localhost'[39m,
+  port: [33m3306[39m,
+  user: [32m'test_user'[39m,
+  database: [32m'test_db'[39m,
+  connectionLimit: [33m10[39m
+}
+
+[90mstdout[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2mtestConnection[2m > [22m[2mshould return true if connection is successful
+[22m[39mInitializing database connection with config: {
+  host: [32m'localhost'[39m,
+  port: [33m3306[39m,
+  user: [32m'test_user'[39m,
+  database: [32m'test_db'[39m,
+  connectionLimit: [33m10[39m
+}
+
+[90mstdout[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2mtestConnection[2m > [22m[2mshould throw error if connection fails
+[22m[39mInitializing database connection with config: {
+  host: [32m'localhost'[39m,
+  port: [33m3306[39m,
+  user: [32m'test_user'[39m,
+  database: [32m'test_db'[39m,
+  connectionLimit: [33m10[39m
+}
+
+[90mstderr[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2mtestConnection[2m > [22m[2mshould throw error if connection fails
+[22m[39mDatabase connection test failed: Error: Connection failed
+    at [90m/home/cdmoper/farside_source/[39m__tests__/services/database.service.test.ts:82:21
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:302:11
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:26
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2323:10[90m)[39m
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2272:10[90m)[39m
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2955:64
+
+[90mstdout[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2mquery methods[2m > [22m[2mquery() should execute sql and return rows
+[22m[39mInitializing database connection with config: {
+  host: [32m'localhost'[39m,
+  port: [33m3306[39m,
+  user: [32m'test_user'[39m,
+  database: [32m'test_db'[39m,
+  connectionLimit: [33m10[39m
+}
+
+[90mstdout[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2mquery methods[2m > [22m[2mqueryOne() should return the first row
+[22m[39mInitializing database connection with config: {
+  host: [32m'localhost'[39m,
+  port: [33m3306[39m,
+  user: [32m'test_user'[39m,
+  database: [32m'test_db'[39m,
+  connectionLimit: [33m10[39m
+}
+
+[90mstdout[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2mquery methods[2m > [22m[2mqueryOne() should return null if no rows
+[22m[39mInitializing database connection with config: {
+  host: [32m'localhost'[39m,
+  port: [33m3306[39m,
+  user: [32m'test_user'[39m,
+  database: [32m'test_db'[39m,
+  connectionLimit: [33m10[39m
+}
+
+[90mstdout[2m | __tests__/services/database.service.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2mquery methods[2m > [22m[2mexecute() should execute sql and return result header
+[22m[39mInitializing database connection with config: {
+  host: [32m'localhost'[39m,
+  port: [33m3306[39m,
+  user: [32m'test_user'[39m,
+  database: [32m'test_db'[39m,
+  connectionLimit: [33m10[39m
+}
+
+ [32m✓[39m __tests__/services/database.service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [31m❯[39m __tests__/routes/download.routes.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 45[2mms[22m[39m
+[31m       [31m×[31m should return 200 and list of files[39m[32m 39[2mms[22m[39m
+[31m       [31m×[31m should return 400 if no file[39m[32m 2[2mms[22m[39m
+[31m       [31m×[31m should return 200 on successful deletion[39m[32m 2[2mms[22m[39m
+[90mstderr[2m | __tests__/routes/category.routes.test.ts[2m > [22m[2mCategory Routes[2m > [22m[2mGET /category[2m > [22m[2mshould return 500 on service error
+[22m[39mError in GET /category: Error: DB Error
+    at [90m/home/cdmoper/farside_source/[39m__tests__/routes/category.routes.test.ts:67:50
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:302:11
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:26
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2323:10[90m)[39m
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2272:10[90m)[39m
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2955:64
+
+ [32m✓[39m __tests__/routes/category.routes.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+[90mstderr[2m | __tests__/routes/dashboard.routes.test.ts[2m > [22m[2mDashboard Routes[2m > [22m[2mGET /dashboard/stats[2m > [22m[2mshould return 500 on db error
+[22m[39mDashboard Stats Error: Error: DB Error
+    at [90m/home/cdmoper/farside_source/[39m__tests__/routes/dashboard.routes.test.ts:44:61
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:302:11
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:26
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2323:10[90m)[39m
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2272:10[90m)[39m
+    at [90mfile:///home/cdmoper/farside_source/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2955:64
+
+(node:1378846) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ [32m✓[39m __tests__/routes/dashboard.routes.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32m✓[39m __tests__/routes/search.routes.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m __tests__/routes/auth.routes.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [31m❯[39m __tests__/routes/employee.routes.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 40[2mms[22m[39m
+[31m       [31m×[31m should return 400 if cid is invalid[39m[32m 34[2mms[22m[39m
+[31m       [31m×[31m should return 200 and data if cid is valid[39m[32m 2[2mms[22m[39m
+[31m       [31m×[31m should return 400 if query is missing[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m should return 200 and search results[39m[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m __tests__/routes/news.routes.test.ts[2m [ __tests__/routes/news.routes.test.ts ][22m
+[31m[1mReferenceError[22m: Cannot access 'mockGetAllNews' before initialization[39m
+[36m [2m❯[22m NewsService.<instance_members_initializer> __tests__/routes/news.routes.test.ts:[2m12:18[22m[39m
+    [90m 10|[39m vi[33m.[39m[34mmock[39m([32m'../../src/services/news.service'[39m[33m,[39m () [33m=>[39m ({
+    [90m 11|[39m   [33mNewsService[39m[33m:[39m [35mclass[39m {
+    [90m 12|[39m     getAllNews [33m=[39m mockGetAllNews[33m;[39m
+    [90m   |[39m                  [31m^[39m
+    [90m 13|[39m     createNews [33m=[39m mockCreateNews[33m;[39m
+    [90m 14|[39m     deleteNews [33m=[39m mockDeleteNews[33m;[39m
+[90m [2m❯[22m new NewsService __tests__/routes/news.routes.test.ts:[2m11:16[22m[39m
+[90m [2m❯[22m src/routes/news.routes.ts:[2m9:17[22m[39m
+[90m [2m❯[22m __tests__/routes/news.routes.test.ts:[2m3:1[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m __tests__/routes/user.routes.test.ts[2m [ __tests__/routes/user.routes.test.ts ][22m
+[31m[1mError[22m: [vitest] No "adminAuthMiddleware" export is defined on the "../../src/middleware/dual-auth.middleware" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("../../src/middleware/dual-auth.middleware"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m src/routes/user.routes.ts:[2m13:17[22m[39m
+    [90m 11|[39m [90m// All routes here require ADMIN privileges[39m
+    [90m 12|[39m [90m// Expecting: Authorization: Bearer <JWT_TOKEN>[39m
+    [90m 13|[39m router[33m.[39m[34muse[39m([32m'*'[39m[33m,[39m adminAuthMiddleware)[33m;[39m
+    [90m   |[39m                 [31m^[39m
+    [90m 14|[39m
+    [90m 15|[39m [90m/**
+[90m [2m❯[22m __tests__/routes/user.routes.test.ts:[2m3:1[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 7 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m __tests__/routes/download.routes.test.ts[2m > [22mDownload Routes[2m > [22mGET /download/files[2m > [22mshould return 200 and list of files
+[31m[1mAssertionError[22m: expected 404 to be 200 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 404[39m
+
+[36m [2m❯[22m __tests__/routes/download.routes.test.ts:[2m54:26[22m[39m
+    [90m 52|[39m       mockGetAllFiles[33m.[39m[34mmockResolvedValueOnce[39m([])[33m;[39m
+    [90m 53|[39m       [35mconst[39m res [33m=[39m [35mawait[39m app[33m.[39m[34mrequest[39m([32m'/download/files'[39m)[33m;[39m
+    [90m 54|[39m       [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 55|[39m       [35mconst[39m data [33m=[39m [35mawait[39m res[33m.[39m[34mjson[39m()[33m;[39m
+    [90m 56|[39m       [34mexpect[39m(data[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m __tests__/routes/download.routes.test.ts[2m > [22mDownload Routes[2m > [22mPOST /download/upload[2m > [22mshould return 400 if no file
+[31m[1mAssertionError[22m: expected 404 to be 400 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 400[39m
+[31m+ 404[39m
+
+[36m [2m❯[22m __tests__/routes/download.routes.test.ts:[2m65:26[22m[39m
+    [90m 63|[39m         method[33m:[39m [32m'POST'[39m[33m,[39m
+    [90m 64|[39m       })[33m;[39m
+    [90m 65|[39m       [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m400[39m)[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 66|[39m     })[33m;[39m
+    [90m 67|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m __tests__/routes/download.routes.test.ts[2m > [22mDownload Routes[2m > [22mDELETE /download/:id[2m > [22mshould return 200 on successful deletion
+[31m[1mAssertionError[22m: expected 404 to be 200 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 404[39m
+
+[36m [2m❯[22m __tests__/routes/download.routes.test.ts:[2m73:26[22m[39m
+    [90m 71|[39m       mockDeleteFile[33m.[39m[34mmockResolvedValueOnce[39m([35mtrue[39m)[33m;[39m
+    [90m 72|[39m       const res = await app.request('/download/1', { method: 'DELETE' …
+    [90m 73|[39m       [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 74|[39m     })[33m;[39m
+    [90m 75|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m __tests__/routes/employee.routes.test.ts[2m > [22mEmployee Routes[2m > [22mGET /employee/verify/:cid[2m > [22mshould return 400 if cid is invalid
+[31m[1mAssertionError[22m: expected 404 to be 400 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 400[39m
+[31m+ 404[39m
+
+[36m [2m❯[22m __tests__/routes/employee.routes.test.ts:[2m44:26[22m[39m
+    [90m 42|[39m     [34mit[39m([32m'should return 400 if cid is invalid'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m 43|[39m       const res = await app.request('/employee/verify/123'); // Too sh…
+    [90m 44|[39m       [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m400[39m)[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 45|[39m     })[33m;[39m
+    [90m 46|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m __tests__/routes/employee.routes.test.ts[2m > [22mEmployee Routes[2m > [22mGET /employee/verify/:cid[2m > [22mshould return 200 and data if cid is valid
+[31m[1mAssertionError[22m: expected 404 to be 200 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 404[39m
+
+[36m [2m❯[22m __tests__/routes/employee.routes.test.ts:[2m50:26[22m[39m
+    [90m 48|[39m       mockGetEmployeeData.mockResolvedValueOnce({ cid: '1234567890123'…
+    [90m 49|[39m       [35mconst[39m res [33m=[39m [35mawait[39m app[33m.[39m[34mrequest[39m([32m'/employee/verify/1234567890123'[39m)[33m;[39m
+    [90m 50|[39m       [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 51|[39m       [35mconst[39m data [33m=[39m [35mawait[39m res[33m.[39m[34mjson[39m()[33m;[39m
+    [90m 52|[39m       [34mexpect[39m(data[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m __tests__/routes/employee.routes.test.ts[2m > [22mEmployee Routes[2m > [22mGET /employee/search[2m > [22mshould return 400 if query is missing
+[31m[1mAssertionError[22m: expected 404 to be 400 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 400[39m
+[31m+ 404[39m
+
+[36m [2m❯[22m __tests__/routes/employee.routes.test.ts:[2m60:26[22m[39m
+    [90m 58|[39m     [34mit[39m([32m'should return 400 if query is missing'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m 59|[39m       [35mconst[39m res [33m=[39m [35mawait[39m app[33m.[39m[34mrequest[39m([32m'/employee/search'[39m)[33m;[39m
+    [90m 60|[39m       [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m400[39m)[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 61|[39m     })[33m;[39m
+    [90m 62|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m __tests__/routes/employee.routes.test.ts[2m > [22mEmployee Routes[2m > [22mGET /employee/search[2m > [22mshould return 200 and search results
+[31m[1mAssertionError[22m: expected 404 to be 200 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 404[39m
+
+[36m [2m❯[22m __tests__/routes/employee.routes.test.ts:[2m66:26[22m[39m
+    [90m 64|[39m       mockSearchEmployees[33m.[39m[34mmockResolvedValueOnce[39m([{ name[33m:[39m [32m'Test'[39m }])[33m;[39m
+    [90m 65|[39m       [35mconst[39m res [33m=[39m [35mawait[39m app[33m.[39m[34mrequest[39m([32m'/employee/search?q=Test'[39m)[33m;[39m
+    [90m 66|[39m       [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 67|[39m       [35mconst[39m data [33m=[39m [35mawait[39m res[33m.[39m[34mjson[39m()[33m;[39m
+    [90m 68|[39m       [34mexpect[39m(data[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (9)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[2m | [22m[1m[32m27 passed[39m[22m[90m (34)[39m
+[2m   Start at [22m 15:15:07
+[2m   Duration [22m 674ms[2m (transform 1.01s, setup 0ms, import 1.55s, tests 288ms, environment 1ms)[22m
+
+[1m[30m[41m FAIL [49m[39m[22m [31mTests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[31mCancelling test run. Press CTRL+c again to exit forcefully.
+[39m
