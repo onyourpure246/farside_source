@@ -283,9 +283,9 @@ export class DownloadService {
 		const createdBy = data.created_by || null;
 
 		const result = await execute(
-			`INSERT INTO dl_files (parent, category_id, name, description, filename, sysname, mui_icon, mui_colour, isactive, downloads, release_year, created_by, updated_by, created_at, updated_at)
+			`INSERT INTO dl_files (parent, category_id, name, description, filename, sysname, mui_icon, mui_colour, isactive, downloads, version, created_by, updated_by, created_at, updated_at)
 			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, NOW(), NOW())`,
-			[data.parent || null, data.category_id || null, data.name, data.description || null, data.filename, data.sysname, muiIcon, muiColour, isactive, data.release_year || null, createdBy, createdBy]
+			[data.parent || null, data.category_id || null, data.name, data.description || null, data.filename, data.sysname, muiIcon, muiColour, isactive, data.version || null, createdBy, createdBy]
 		);
 
 		// Fetch the created file, ignoring active check
@@ -338,9 +338,9 @@ export class DownloadService {
 			updates.push('updated_by = ?');
 			values.push(parseInt(String(data.updated_by)));
 		}
-		if (data.release_year !== undefined) {
-			updates.push('release_year = ?');
-			values.push(data.release_year);
+		if (data.version !== undefined) {
+			updates.push('version = ?');
+			values.push(data.version);
 		}
 
 		if (updates.length === 0) {
